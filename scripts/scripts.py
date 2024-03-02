@@ -10,11 +10,12 @@ class GiveMeUsefulData():
     self.output_json_name = "data.json"
 
     # Keeping all the raw data here, these should never be modified outside of init
-    self.routes_raw = pd.read_csv(os.path.join(self.data_dir, "routes.txt"))
-    self.trips_raw  = pd.read_csv(os.path.join(self.data_dir, "trips.txt"))
-    self.shapes_raw = pd.read_csv(os.path.join(self.data_dir, "shapes.txt"))
-    self.stops_raw  = pd.read_csv(os.path.join(self.data_dir, "stops.txt"))
+    self.routes_raw     = pd.read_csv(os.path.join(self.data_dir, "routes.txt"))
+    self.trips_raw      = pd.read_csv(os.path.join(self.data_dir, "trips.txt"))
+    self.shapes_raw     = pd.read_csv(os.path.join(self.data_dir, "shapes.txt"))
+    self.stops_raw      = pd.read_csv(os.path.join(self.data_dir, "stops.txt"))
     self.stop_times_raw = pd.read_csv(os.path.join(self.data_dir, "stop_times.txt"))
+    self.calendar_raw   = pd.read_csv(os.path.join(self.data_dir, "calendar.txt"))
 
     # Get rid of some meaningless data or empty columns
     self.trips_raw.drop(columns=[
@@ -112,6 +113,7 @@ class GiveMeUsefulData():
     for route in data:
       for trip_id in route["trips"].keys():
         route["trips"][trip_id]["stops"] = []
+        route["trips"][trip_id]["days"] = []
 
     for route in data:
       for _, stop_time in self.stop_times_raw.iterrows():
@@ -122,6 +124,32 @@ class GiveMeUsefulData():
 
     with open(os.path.join(self.output_dir, "data3.json"), "w") as f:
       json.dump(data, f)
+
+    with open(os.path.join(self.output_dir, "data3.json"), "r") as f:
+      data = json.load(f)
+
+
+    # Python for loops are slow, this will be fun
+    for route in data:
+      for _, service in self.calendar_raw.iterrows():
+        for trip_id, trip_data in route["trips"].items():
+          if service["service_id"] == trip_data["service_id"]:
+            for day in ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]:
+              if (service[day]):
+                route["trips"][trip_id]["days"].append(day)
+
+    with open(os.path.join(self.output_dir, "data4.json"), "w") as f:
+      json.dump(data, f)
+
+
+  def get_unique_service_ids(self):
+    return self.trips_raw.service_id.unique()
+
+
+  def show_unique_service_ids(self):
+    uniques = self.trips_raw.service_id.unique()
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+      print(uniques)
 
 
   # Initial testing thing, proven wrong since HUIT route has more than one shape
