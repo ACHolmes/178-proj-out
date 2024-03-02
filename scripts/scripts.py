@@ -7,31 +7,56 @@ class GiveMeUsefulData():
   def __init__(self):
     self.data_dir = "data"
     self.output_dir = "out"
-    self.intermediate_json_name = "temp.json"
     self.output_json_name = "data.json"
-    self.routes = pd.read_csv(os.path.join(self.data_dir, "routes.txt"))
-    self.trips = pd.read_csv(os.path.join(self.data_dir, "trips.txt"))
-    self.shapes = pd.read_csv(os.path.join(self.data_dir, "shapes.txt"))
+
+    # Keeping all the raw data here, these should never be modified outside of init
+    self.routes_raw = pd.read_csv(os.path.join(self.data_dir, "routes.txt"))
+    self.trips_raw  = pd.read_csv(os.path.join(self.data_dir, "trips.txt"))
+    self.shapes_raw = pd.read_csv(os.path.join(self.data_dir, "shapes.txt"))
+    self.stops_raw  = pd.read_csv(os.path.join(self.data_dir, "stops.txt"))
+
+    # Get rid of some meaningless data or empty columns
+    self.trips_raw.drop(columns=[
+      "wheelchair_accessible",
+      "bikes_allowed",
+      "direction_id",
+      "block_id"
+    ], inplace=True)
+    self.stops_raw.drop(columns=[
+      "stop_desc",
+      "stop_url",
+      "location_type",
+      "stop_timezone",
+      "wheelchair_boarding",
+      "platform_code"
+    ], inplace=True)
+    self.routes_raw.drop(columns=[
+      "agency_id",
+      "route_type"
+    ], inplace=True)
+
+    self.trips_raw["trip_short_name"] = self.trips_raw["trip_short_name"].fillna("")
+    self.trips_raw["trip_headsign"]   = self.trips_raw["trip_headsign"].fillna("")
 
   # Currently the actual useful thing
   def create_json(self):
 
     # Just creating JSON with all the route data
-    self.routes.to_json(os.path.join(self.output_dir, self.intermediate_json_name), orient='records', lines=True)
-    with open(os.path.join(self.output_dir, self.intermediate_json_name), "r") as f:
-      raw_data = [json.loads(line) for line in f]
+    self.routes_raw.to_json(os.path.join(self.output_dir, "routes.json"), orient='records', lines=True)
+    with open(os.path.join(self.output_dir, "routes.json"), "r") as f:
+      data = [json.loads(line) for line in f]
 
     # Make sure every route has an empty shape, trying to help
     # ppl avoid errors later
-    for route in raw_data:
+    for route in data:
       route["shapes"] = {}
 
     # Unique route/shape pairs in trips
-    route_shape_pairs = set((row["route_id"], row["shape_id"]) for _, row in self.trips.iterrows())
+    route_shape_pairs = set((row["route_id"], row["shape_id"]) for _, row in self.trips_raw.iterrows())
 
     # Put the shape ids in for each shape found with a route id match
     # initialize with empty points for that shape id
-    for route in raw_data:
+    for route in data:
       for pair in route_shape_pairs:
         if (route["route_id"] == pair[0]):
           route["shapes"][pair[1]] = {
@@ -40,8 +65,8 @@ class GiveMeUsefulData():
 
     # Alright this will take a while but whatever
     # Add all shape points for each shape
-    for _, row in self.shapes.iterrows():
-      for route in raw_data:
+    for _, row in self.shapes_raw.iterrows():
+      for route in data:
         # Check shape id of this point is one of the shapes with this route
         if row["shape_id"] in route["shapes"].keys():
           # Convert to dictionary not to mess with original df
@@ -52,8 +77,27 @@ class GiveMeUsefulData():
           break
 
     # Dump what we have to json for now
-    with open(os.path.join(self.output_dir, self.output_json_name), "w") as f:
-      json.dump(raw_data, f)
+    with open(os.path.join(self.output_dir, "data1.json"), "w") as f:
+      json.dump(data, f)
+
+    # Time to start adding stop data
+    with open(os.path.join(self.output_dir, "data1.json"), "r") as f:
+      data = json.load(f)
+
+    for route in data:
+      route["trips"] = {}
+
+    for route in data:
+      for _, trip in self.trips_raw.iterrows():
+        if route["route_id"] == trip["route_id"]:
+          t = dict(trip)
+          t.pop("route_id")
+          trip_id = t.pop("trip_id")
+          route["trips"][trip_id] = t
+    with open(os.path.join(self.output_dir, "data2.json"), "w") as f:
+      json.dump(data, f)
+
+
 
   # Initial testing thing, proven wrong since HUIT route has more than one shape
   # Can probably delete
