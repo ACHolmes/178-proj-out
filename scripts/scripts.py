@@ -14,6 +14,7 @@ class GiveMeUsefulData():
     self.trips_raw  = pd.read_csv(os.path.join(self.data_dir, "trips.txt"))
     self.shapes_raw = pd.read_csv(os.path.join(self.data_dir, "shapes.txt"))
     self.stops_raw  = pd.read_csv(os.path.join(self.data_dir, "stops.txt"))
+    self.stop_times_raw = pd.read_csv(os.path.join(self.data_dir, "stop_times.txt"))
 
     # Get rid of some meaningless data or empty columns
     self.trips_raw.drop(columns=[
@@ -34,7 +35,14 @@ class GiveMeUsefulData():
       "agency_id",
       "route_type"
     ], inplace=True)
+    self.stop_times_raw.drop(columns=[
+      "stop_headsign",
+      "pickup_type",
+      "drop_off_type",
+      "timepoint"
+    ], inplace=True)
 
+    # Replace NaNs with empty strings
     self.trips_raw["trip_short_name"] = self.trips_raw["trip_short_name"].fillna("")
     self.trips_raw["trip_headsign"]   = self.trips_raw["trip_headsign"].fillna("")
 
@@ -92,11 +100,28 @@ class GiveMeUsefulData():
         if route["route_id"] == trip["route_id"]:
           t = dict(trip)
           t.pop("route_id")
-          trip_id = t.pop("trip_id")
+          trip_id = t["trip_id"]
           route["trips"][trip_id] = t
     with open(os.path.join(self.output_dir, "data2.json"), "w") as f:
       json.dump(data, f)
 
+
+    with open(os.path.join(self.output_dir, "data2.json"), "r") as f:
+      data = json.load(f)
+
+    for route in data:
+      for trip_id in route["trips"].keys():
+        route["trips"][trip_id]["stops"] = []
+
+    for route in data:
+      for _, stop_time in self.stop_times_raw.iterrows():
+        if str(stop_time["trip_id"]) in route["trips"].keys():
+          stop_t = dict(stop_time)
+          trip_id = str(stop_t.pop("trip_id"))
+          route["trips"][trip_id]["stops"].append(stop_t)
+
+    with open(os.path.join(self.output_dir, "data3.json"), "w") as f:
+      json.dump(data, f)
 
 
   # Initial testing thing, proven wrong since HUIT route has more than one shape
