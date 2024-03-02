@@ -1,23 +1,33 @@
 import logo from './logo.svg';
 import './App.css';
 
+import React, { useState, useEffect } from 'react';
+
 function App() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('https://passio3.com/harvard/passioTransit/gtfs/realtime/vehiclePositions.json');
+      console.log(response);
+      const result = await response.json();
+      setData(result);
+    };
+
+    const interval = setInterval(fetchData, 2000); // Fetch data every 2 seconds
+
+    return () => clearInterval(interval); // Clean up interval on unmount
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {data ? (
+        <div>
+          {JSON.stringify(data)}
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 }
