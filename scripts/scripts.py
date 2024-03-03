@@ -7,6 +7,8 @@ class GiveMeUsefulData():
   def __init__(self):
     self.data_dir = "data"
     self.output_dir = "out"
+    self.routes_dir = os.path.join(self.output_dir, "route_orientated")
+    self.stops_dir  = os.path.join(self.output_dir, "stop_orientated")
     self.output_json_name = "data.json"
 
     # Keeping all the raw data here, these should never be modified outside of init
@@ -47,12 +49,15 @@ class GiveMeUsefulData():
     self.trips_raw["trip_short_name"] = self.trips_raw["trip_short_name"].fillna("")
     self.trips_raw["trip_headsign"]   = self.trips_raw["trip_headsign"].fillna("")
 
+  def please(self):
+    self.create_routes_json()
+
   # Currently the actual useful thing
-  def create_json(self):
+  def create_routes_json(self):
 
     # Just creating JSON with all the route data
-    self.routes_raw.to_json(os.path.join(self.output_dir, "routes.json"), orient='records', lines=True)
-    with open(os.path.join(self.output_dir, "routes.json"), "r") as f:
+    self.routes_raw.to_json(os.path.join(self.routes_dir, "routes_raw.json"), orient='records', lines=True)
+    with open(os.path.join(self.routes_dir, "routes_raw.json"), "r") as f:
       data = [json.loads(line) for line in f]
 
     # Make sure every route has an empty shape, trying to help
@@ -86,11 +91,11 @@ class GiveMeUsefulData():
           break
 
     # Dump what we have to json for now
-    with open(os.path.join(self.output_dir, "data1.json"), "w") as f:
+    with open(os.path.join(self.routes_dir, "data1.json"), "w") as f:
       json.dump(data, f)
 
     # Time to start adding stop data
-    with open(os.path.join(self.output_dir, "data1.json"), "r") as f:
+    with open(os.path.join(self.routes_dir, "data1.json"), "r") as f:
       data = json.load(f)
 
     for route in data:
@@ -103,11 +108,11 @@ class GiveMeUsefulData():
           t.pop("route_id")
           trip_id = t["trip_id"]
           route["trips"][trip_id] = t
-    with open(os.path.join(self.output_dir, "data2.json"), "w") as f:
+    with open(os.path.join(self.routes_dir, "data2.json"), "w") as f:
       json.dump(data, f)
 
 
-    with open(os.path.join(self.output_dir, "data2.json"), "r") as f:
+    with open(os.path.join(self.routes_dir, "data2.json"), "r") as f:
       data = json.load(f)
 
     for route in data:
@@ -122,10 +127,10 @@ class GiveMeUsefulData():
           trip_id = str(stop_t.pop("trip_id"))
           route["trips"][trip_id]["stops"].append(stop_t)
 
-    with open(os.path.join(self.output_dir, "data3.json"), "w") as f:
+    with open(os.path.join(self.routes_dir, "data3.json"), "w") as f:
       json.dump(data, f)
 
-    with open(os.path.join(self.output_dir, "data3.json"), "r") as f:
+    with open(os.path.join(self.routes_dir, "data3.json"), "r") as f:
       data = json.load(f)
 
 
@@ -138,7 +143,25 @@ class GiveMeUsefulData():
               if (service[day]):
                 route["trips"][trip_id]["days"].append(day)
 
-    with open(os.path.join(self.output_dir, "data4.json"), "w") as f:
+    with open(os.path.join(self.routes_dir, "data4.json"), "w") as f:
+      json.dump(data, f)
+
+    with open(os.path.join(self.routes_dir, "data4.json"), "r") as f:
+      data = json.load(f)
+
+    # This will be the worst loop to ever loop
+    for route in data:
+      for _, stop in self.stops_raw.iterrows():
+        for trip_data in route["trips"].values():
+          for stop_data in trip_data["stops"]:
+            if stop_data["stop_id"] == stop["stop_id"]:
+              s = dict(stop)
+              useful_data = {
+                k: v for k, v in s.items() if k in ["stop_code", "stop_name", "stop_lat", "stop_lon"]
+              }
+              for k, v in useful_data.items():
+                stop_data[k] = v
+    with open(os.path.join(self.routes_dir, "data5.json"), "w") as f:
       json.dump(data, f)
 
 
@@ -176,4 +199,4 @@ class GiveMeUsefulData():
       for item in data.values():
         print(f"Route: {item['route_long_name']}, Shape: {item['shape_id']}")
 
-GiveMeUsefulData().create_json()
+GiveMeUsefulData().please()
