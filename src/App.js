@@ -8,14 +8,18 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch('https://passio3.com/harvard/passioTransit/gtfs/realtime/vehiclePositions.json');
-      console.log(response);
       const result = await response.json();
       setData(result);
     };
 
-    const interval = setInterval(fetchData, 2000); // Fetch data every 2 seconds
+    // Get initial data immediately
+    fetchData();
 
-    return () => clearInterval(interval); // Clean up interval on unmount
+    // Then update data every 2s
+    const interval = setInterval(fetchData, 2000);
+
+    // Clean up interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
