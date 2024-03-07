@@ -1,6 +1,7 @@
 import './App.css';
 
 import React, { useState, useEffect } from 'react';
+import Map from './components/map';
 
 function App() {
   const [data, setData] = useState(null);
@@ -27,6 +28,8 @@ function App() {
       {data ? (
         <div>
           {JSON.stringify(data)}
+
+          <Map></Map>
         </div>
       ) : (
         <p>Loading...</p>
