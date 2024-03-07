@@ -1,36 +1,24 @@
 import './App.css';
-
 import React, { useState, useEffect } from 'react';
+import Navigation from './Navigation';
 
 function App() {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch('https://passio3.com/harvard/passioTransit/gtfs/realtime/vehiclePositions.json');
-      const result = await response.json();
-      setData(result);
-    };
-
-    // Get initial data immediately
-    fetchData();
-
-    // Then update data every 2s
-    const interval = setInterval(fetchData, 2000);
-
-    // Clean up interval on unmount
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div>
-      {data ? (
+      {/* <button onClick={handleButtonClick}>
+        {showJson ? 'Hide JSON' : 'Show JSON'}
+      </button>
+      {showJson ? (
         <div>
-          {JSON.stringify(data)}
+          {liveData ? (
+            <pre>{JSON.stringify(liveData, null, 2)}</pre>
+          ) : (
+            <p>Loading...</p>
+          )}
         </div>
-      ) : (
-        <p>Loading...</p>
-      )}
+      ) : null} */}
+      <Navigation />
     </div>
   );
 }
