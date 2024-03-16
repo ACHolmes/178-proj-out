@@ -1,4 +1,4 @@
-import { GoogleMap, useLoadScript, Marker, Polyline } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, Marker, Polyline, Circle } from '@react-google-maps/api';
 import route_data from '../../data/data5.json';
 
 const example_route = route_data[0]["shapes"]["48686"]["points"];
@@ -15,6 +15,14 @@ const route_options = {
   strokeOpacity: 1.0,
   strokeWeight: 2
 };
+
+const example_bus_options = {
+  strokeColor: "#FF0000",
+  strokeOpacity: 0.8,
+  strokeWeight: 2,
+  fillColor: "#FF0000",
+  fillOpacity: 0.35
+}
 
 /*
 Using the quick start tutorial from here, just making it its own component.
@@ -69,7 +77,16 @@ const mapOptions = {
   styles: styles["hide"]
 };
 
-const Map = () => {
+const Map = (props) => {
+  let gmap_bus_pos = null;
+  if (props.liveData) {
+    const raw_bus_pos = props.liveData.entity[0].vehicle.position;
+    gmap_bus_pos = {
+      "lat": raw_bus_pos["latitude"],
+      "lng": raw_bus_pos["longitude"]
+    };
+  }
+
   const { isLoaded: isMapLoaded, loadError: loadMapError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
     libraries,
@@ -100,6 +117,12 @@ const Map = () => {
 
         */}
         <Polyline path={gmaps_route} options={route_options} />
+
+        {props.liveData ? <Circle
+          options={example_bus_options}
+          center={gmap_bus_pos}
+          radius={20}
+        /> : ""}
       </GoogleMap>
     </>
   );

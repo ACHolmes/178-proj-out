@@ -29,7 +29,7 @@ function App() {
         <div>
           {JSON.stringify(data)}
 
-          <Map></Map>
+          <Map liveData={data}></Map>
         </div>
       ) : (
         <p>Loading...</p>
