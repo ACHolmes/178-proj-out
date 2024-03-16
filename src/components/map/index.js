@@ -1,5 +1,20 @@
-import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
-import { useEffect } from 'react';
+import { GoogleMap, useLoadScript, Marker, Polyline } from '@react-google-maps/api';
+import route_data from '../../data/data5.json';
+
+const example_route = route_data[0]["shapes"]["48686"]["points"];
+const gmaps_route   = example_route.map((itm) => {
+  return {
+    "lat": itm["shape_pt_lat"],
+    "lng": itm["shape_pt_lon"]
+  }
+});
+
+const route_options = {
+  geodesic: true,
+  strokeColor: "#FF0000",
+  strokeOpacity: 1.0,
+  strokeWeight: 2
+};
 
 /*
 Using the quick start tutorial from here, just making it its own component.
@@ -20,7 +35,6 @@ const center = {
   lat: 42.381867,
   lng: -71.125325,
 };
-
 
 /*
 See https://developers.google.com/maps/documentation/javascript/style-reference#style-features
@@ -79,6 +93,13 @@ const Map = () => {
         }
       >
         <Marker position={center} />
+
+        {/*
+          https://developers.google.com/maps/documentation/javascript/examples/polyline-simple for polyline example.
+          To translate it to React, I just CTRL clicked Polyline and went searching in this TS files to find defintions for Polyline and what props it accepts.
+
+        */}
+        <Polyline path={gmaps_route} options={route_options} />
       </GoogleMap>
     </>
   );
