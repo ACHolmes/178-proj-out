@@ -77,19 +77,25 @@ const mapOptions = {
 };
 
 const Map = (props) => {
-  let gmap_bus_pos = null;
-
   console.log("routes, then buses coming up");
   console.log(props.routes);
   console.log(props.buses);
 
-  // if (props.liveData) {
-  //   const raw_bus_pos = props.liveData.entity[0].vehicle.position;
-  //   gmap_bus_pos = {
-  //     "lat": raw_bus_pos["latitude"],
-  //     "lng": raw_bus_pos["longitude"]
-  //   };
-  // }
+  const buses = props.buses.map((bus) => {
+    return {
+      "lat": bus.vehicle.position["latitude"],
+      "lng": bus.vehicle.position["longitude"]
+    }
+  });
+
+  const routes = props.routes.map((route) => {
+    return route.points.map((point) => {
+      return {
+        "lat": point["shape_pt_lat"],
+        "lng": point["shape_pt_lon"]
+      }
+    })
+  })
 
   const { isLoaded: isMapLoaded, loadError: loadMapError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -120,6 +126,25 @@ const Map = (props) => {
           To translate it to React, I just CTRL clicked Polyline and went searching in this TS files to find defintions for Polyline and what props it accepts.
 
         */}
+
+        {
+          routes.map((route) => {
+            return <Polyline path={route} options={route_options}/>
+          })
+        }
+
+        {
+          buses.map((bus) => {
+            return <Circle
+              options={example_bus_options}
+              center={bus}
+              radius={20}
+
+            />
+          })
+        }
+
+
         {/* <Polyline path={gmaps_route} options={route_options} />
 
         {props.liveData ? <Circle
