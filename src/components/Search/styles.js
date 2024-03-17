@@ -5,6 +5,7 @@ export const TextInput = styled.input`
   ::placeholder {
     color: gray;
   }
+  text-align: center;
 `;
 
 export const InputContainer = styled.div`

@@ -6,12 +6,12 @@ const Search = (props) => {
       <TextInput
         height={props.height}
         width={props.width}
-        placeholder={"example 1"}
+        placeholder={"To"}
       />
       <TextInput
         height={props.height}
         width={props.width}
-        placeholder={"example 2"}
+        placeholder={"From"}
       />
     </InputContainer>
   );

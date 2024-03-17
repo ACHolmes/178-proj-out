@@ -55,6 +55,7 @@ const MapWrapper = (props) => {
       setData(result);
     } else {
       console.log("No entity returned by API. API either being refreshed, no bus data currently or I guess maybe got ratelimited or similar?");
+      console.log(result);
     }
   };
 
@@ -71,16 +72,14 @@ const MapWrapper = (props) => {
   }, []);
 
   return (
-    <div>
+    <>
       <Search height={props.height} width={props.width}/>
-      {data && routes ? (
+      {
         <div>
-          <Map height={props.height} width={props.width} buses={data.entity} routes={routes}></Map>
+          <Map height={props.height} width={props.width} buses={data ? (data.entity) : []} routes={routes ? routes : []}></Map>
         </div>
-      ) : (
-        <p>Loading...</p>
-      )}
-    </div>
+      }
+    </>
   );
 }
 
