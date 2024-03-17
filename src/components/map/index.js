@@ -1,20 +1,5 @@
 import { GoogleMap, useLoadScript, Marker, Polyline, Circle } from '@react-google-maps/api';
 
-const route_options = {
-  geodesic: true,
-  strokeColor: "#FF0000",
-  strokeOpacity: 1.0,
-  strokeWeight: 2
-};
-
-const example_bus_options = {
-  strokeColor: "#FF0000",
-  strokeOpacity: 0.8,
-  strokeWeight: 2,
-  fillColor: "#FF0000",
-  fillOpacity: 0.35
-}
-
 /*
 Using the quick start tutorial from here, just making it its own component.
 https://medium.com/@yukthihettiarachchissck/getting-started-with-google-maps-api-in-react-js-1390b19d18f0
@@ -75,8 +60,18 @@ const Map = (props) => {
 
   const buses = props.buses.map((bus) => {
     return {
-      "lat": bus.vehicle.position["latitude"],
-      "lng": bus.vehicle.position["longitude"]
+      "position": {
+        "lat": bus.vehicle.position["latitude"],
+        "lng": bus.vehicle.position["longitude"]
+      },
+      "radius": 30,
+      "options": {
+        strokeColor: `#${bus.vehicle.route_data.route_color}`,
+        strokeOpacity: 0.8,
+        strokeWeight: 3,
+        fillColor: `#${bus.vehicle.route_data.route_color}`,
+        fillOpacity: 0.65
+      }
     }
   });
 
@@ -90,7 +85,7 @@ const Map = (props) => {
       }),
       "options": {
         geodesic: true,
-        strokeColor: "#" + route.route_color,
+        strokeColor: `#${route.route_color}`,
         strokeOpacity: 1.0,
         strokeWeight: 2
       }
@@ -137,9 +132,9 @@ const Map = (props) => {
         {
           buses.map((bus) => {
             return <Circle
-              options={example_bus_options}
-              center={bus}
-              radius={20}
+              options={bus.options}
+              center={bus.position}
+              radius={bus.radius}
             />
           })
         }
