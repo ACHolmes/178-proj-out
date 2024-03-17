@@ -47,6 +47,7 @@ const Navigation = () => {
     async function getNextBusArrival(route, stopId) {
         // Convert route to string
         const routeKey = route.toString();
+        console.log('stop id is', stopId);
     
         // Check if the route exists in dataByRoute
         const keys = Object.keys(dataByRoute);
@@ -96,10 +97,10 @@ const Navigation = () => {
     }
 
     async function fetchBusArrival(routes, startStopId) {
-        console.log(startStopId);
+        console.log('id is', startStopId);
         const results = [];
         for (const route of routes) {
-            const res = await getNextBusArrival((route, startStopId));
+            const res = await getNextBusArrival(route, startStopId);
             console.log("res is ", res);
             results.push(res);
         }
@@ -108,6 +109,7 @@ const Navigation = () => {
 
     const calculateRoutes = () => {
         const startStopId = stopMappings[userInput.start];
+        console.log(startStopId);
         // console.log('startStopId', startStopId);
         const destinationStopId = stopMappings[userInput.destination];
         console.log('in calc routes function');
