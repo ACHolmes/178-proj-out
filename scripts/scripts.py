@@ -18,6 +18,14 @@ class GiveMeUsefulData():
     self.stops_raw      = pd.read_csv(os.path.join(self.data_dir, "stops.txt"))
     self.stop_times_raw = pd.read_csv(os.path.join(self.data_dir, "stop_times.txt"))
     self.calendar_raw   = pd.read_csv(os.path.join(self.data_dir, "calendar.txt"))
+    self.all_raw_files  = {
+      "routes"      : self.routes_raw,
+      "trips"       : self.trips_raw,
+      "shapes"      : self.shapes_raw,
+      "stops"       : self.stops_raw,
+      "stop_times"  : self.stop_times_raw,
+      "calendar"    : self.calendar_raw
+    }
 
     # Get rid of some meaningless data or empty columns
     self.trips_raw.drop(columns=[
@@ -50,7 +58,7 @@ class GiveMeUsefulData():
     self.trips_raw["trip_headsign"]   = self.trips_raw["trip_headsign"].fillna("")
 
   def please(self):
-    self.create_routes_json()
+    self.txt_to_json()
 
   # Currently the actual useful thing
   def create_routes_json(self):
@@ -163,6 +171,10 @@ class GiveMeUsefulData():
                 stop_data[k] = v
     with open(os.path.join(self.routes_dir, "data5.json"), "w") as f:
       json.dump(data, f)
+
+  def txt_to_json(self):
+    for name, dat in self.all_raw_files.items():
+      dat.to_json(os.path.join(self.output_dir, f"{name}.json"), orient='records')
 
 
   def get_unique_service_ids(self):
