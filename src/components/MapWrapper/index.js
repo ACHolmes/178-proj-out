@@ -3,9 +3,26 @@ import Map from '../Map';
 import Search from '../Search';
 import route_data from '../../data/data5.json';
 
+
 const MapWrapper = (props) => {
   const [data, setData] = useState(null);
   const [routes, setRoutes] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+
+  const updateLocation = () => {
+    navigator.geolocation.getCurrentPosition(success, error);
+  }
+
+  function success(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    setUserLocation({ lat: latitude, lng: longitude });
+    console.log(`user lat: ${latitude}, user lng: ${longitude}`);
+  }
+
+  function error(position) {
+    console.log("unable to get current position");
+  }
 
   const fetchData = async () => {
     const response = await fetch('https://passio3.com/harvard/passioTransit/gtfs/realtime/vehiclePositions.json');
@@ -63,12 +80,17 @@ const MapWrapper = (props) => {
   useEffect(() => {
     // Get initial data immediately
     fetchData();
+    updateLocation();
 
     // Then update data every 2s
-    const interval = setInterval(fetchData, 2000);
+    const api_interval = setInterval(fetchData, 2000);
+    const location_interval = setInterval(updateLocation, 2000);
 
     // Clean up interval on unmount
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(api_interval);
+      clearInterval(location_interval)
+    };
   }, []);
 
   return (
@@ -76,7 +98,15 @@ const MapWrapper = (props) => {
       <Search height={props.height} width={props.width}/>
       {
         <div>
-          <Map height={props.height} width={props.width} buses={data ? (data.entity) : []} routes={routes ? routes : []}></Map>
+          <Map
+            height={props.height}
+            width={props.width}
+            buses={data ? (data.entity) : []}
+            routes={routes ? routes : []}
+            userLocation={userLocation && userLocation}
+            >
+
+          </Map>
         </div>
       }
     </>

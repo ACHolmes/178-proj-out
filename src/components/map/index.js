@@ -1,5 +1,5 @@
-import { GoogleMap, useLoadScript, Polyline, Circle } from '@react-google-maps/api';
-
+import { GoogleMap, useLoadScript, Marker, Polyline, Circle } from '@react-google-maps/api';
+import usermarker from "../../static/usermarker.svg"
 const libraries = ['places'];
 
 // Setting center of the yard as default center
@@ -23,6 +23,8 @@ const styles = {
     }
   ],
 };
+
+
 
 // Setting map options to remove some of the buttons (e.g. street-view) and restrict user (e.g. shouldn't
 // be able to zoom mega far out, bad user experience trying to refind campus).
@@ -120,6 +122,14 @@ const Map = (props) => {
               radius={bus.radius}
             />
           })
+        }
+
+        {
+          props.userLocation &&
+          <Marker
+            position={props.userLocation}
+            icon={usermarker}
+          />
         }
       </GoogleMap>
     </>
