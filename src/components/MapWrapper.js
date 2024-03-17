@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Map from '../Map';
-import Search from '../Search';
-import route_data from '../../data/data5.json';
+import Map from './Map.js';
+import Search from './Search.js';
+import route_data from '../data/data5.json';
 
 const MapWrapper = (props) => {
   const [data, setData] = useState(null);

@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import timetableData from '../../data/stops_data.json';
+import timetableData from '../data/stops_data.json';
 
 const Navigation = (props) => {
   const [fastestRoutes, setFastestRoutes] = useState([]);
