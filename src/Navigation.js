@@ -72,22 +72,26 @@ const Navigation = () => {
 
             // Iterate through stops to find the specified stop
             for (const stop of stops) {
-                console.log('checking stop ', stop);
+                console.log('checking stop ', stop.stop_id);
                 // console.log('stop_id', typeof stop.stop_id);
                 console.log(typeof stopId);
+                console.log(typeof stop.stop_id);
 
-                if (stop.stop_id === stopId) {
+                if (stop.stop_id.toString() === stopId) {
+                    console.log('true');
                     const arrivalTime = new Date(
                         `${currentTime.toDateString()} ${stop.arrival_time}`
                     );
-                    // console.log(arrivalTime);
-                    // console.log(currentTime);
+                    console.log(arrivalTime);
+                    console.log(currentTime);
                     // if valid (upcoming) arrival time, add it and associated tripId to return list
                     if (arrivalTime > currentTime) {
+                        found = true;
                         return (tripId, arrivalTime.toLocaleTimeString());
+                    } else {
+                        console.log('bus already came');
                     }
-                    found = true;
-                    break;
+                    
                 }
             }
          
