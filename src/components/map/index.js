@@ -1,12 +1,4 @@
-import { GoogleMap, useLoadScript, Marker, Polyline, Circle } from '@react-google-maps/api';
-
-/*
-Using the quick start tutorial from here, just making it its own component.
-https://medium.com/@yukthihettiarachchissck/getting-started-with-google-maps-api-in-react-js-1390b19d18f0
-
-Map options here:
-https://developers.google.com/maps/documentation/javascript/reference/map#MapOptions
-*/
+import { GoogleMap, useLoadScript, Polyline, Circle } from '@react-google-maps/api';
 
 const libraries = ['places'];
 const mapContainerStyle = {
@@ -14,17 +6,13 @@ const mapContainerStyle = {
   height: '600px',
 };
 
-// Setting Quad stop as the center, as it should be.
-const center = {
-  lat: 42.381867,
-  lng: -71.125325,
+// Setting center of the yard as default center
+const default_map_center = {
+  lat: 42.374361,
+  lng: -71.116222,
 };
 
-/*
-See https://developers.google.com/maps/documentation/javascript/style-reference#style-features
-for info about posible featureTypes. This is just to get basically a clean map without all the Google Maps
-default markers.
-*/
+// Removing default POIs and other markers
 const styles = {
   default: [],
   hide: [
@@ -50,14 +38,11 @@ const mapOptions = {
   fullscreenControl: false,
   minZoom: 13,
   maxZoom: 18,
+  // Apply style above to remove default markers etc
   styles: styles["hide"]
 };
 
 const Map = (props) => {
-  // console.log("routes, then buses coming up");
-  // console.log(props.routes);
-  // console.log(props.buses);
-
   const buses = props.buses.map((bus) => {
     return {
       "position": {
@@ -105,30 +90,26 @@ const Map = (props) => {
   if (!isMapLoaded) {
     return <div>Map loading...</div>;
   }
+
   return (
     <>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         zoom={15}
-        center={center}
+        center={default_map_center}
         options={
           mapOptions
         }
       >
-        <Marker position={center} />
 
-        {/*
-          https://developers.google.com/maps/documentation/javascript/examples/polyline-simple for polyline example.
-          To translate it to React, I just CTRL clicked Polyline and went searching in this TS files to find defintions for Polyline and what props it accepts.
-
-        */}
-
+        {/* Draw each route! */}
         {
           routes.map((route) => {
             return <Polyline path={route.points} options={route.options}/>
           })
         }
 
+        {/* Draw each bus! */}
         {
           buses.map((bus) => {
             return <Circle
