@@ -56,7 +56,7 @@ const Navigation = () => {
         }
         
         const routeData = dataByRoute[routeKey];
-        console.log(routeData);
+        console.log('route data is', routeData);
         const currentTime = new Date();
     
         // res should be of form ["tripId1": "next bus arrival", "tripId5": "next bus arrival"]
@@ -143,18 +143,6 @@ const Navigation = () => {
         <MapInputForm onSubmit={handleSearch} />
         <p>looking for routes from {userInput.start} to {userInput.destination}</p>
         <p>{routes}</p>
-        {routes.length > 0 && (
-            <div>
-            <h2>Fastest Routes</h2>
-            <ul>
-                {routes.map((route, index) => (
-                <li key={index}>
-                    Route {route.route_id}: Total Travel Time - {route.total_travel_time} minutes, Next Bus Arrival Time - {route.next_bus_arrival_time}
-                </li>
-                ))}
-            </ul>
-            </div>
-        )}
         </div>
     );
 };
