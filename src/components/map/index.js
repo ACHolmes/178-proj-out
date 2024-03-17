@@ -1,13 +1,5 @@
 import { GoogleMap, useLoadScript, Marker, Polyline, Circle } from '@react-google-maps/api';
 
-// const example_route = route_data[0]["shapes"]["48686"]["points"];
-// const gmaps_route   = example_route.map((itm) => {
-//   return {
-//     "lat": itm["shape_pt_lat"],
-//     "lng": itm["shape_pt_lon"]
-//   }
-// });
-
 const route_options = {
   geodesic: true,
   strokeColor: "#FF0000",
@@ -77,9 +69,9 @@ const mapOptions = {
 };
 
 const Map = (props) => {
-  console.log("routes, then buses coming up");
-  console.log(props.routes);
-  console.log(props.buses);
+  // console.log("routes, then buses coming up");
+  // console.log(props.routes);
+  // console.log(props.buses);
 
   const buses = props.buses.map((bus) => {
     return {
@@ -89,12 +81,21 @@ const Map = (props) => {
   });
 
   const routes = props.routes.map((route) => {
-    return route.points.map((point) => {
-      return {
-        "lat": point["shape_pt_lat"],
-        "lng": point["shape_pt_lon"]
+    return {
+      "points": route.points.map((point) => {
+        return {
+          "lat": point["shape_pt_lat"],
+          "lng": point["shape_pt_lon"]
+        }
+      }),
+      "options": {
+        geodesic: true,
+        strokeColor: "#" + route.route_color,
+        strokeOpacity: 1.0,
+        strokeWeight: 2
       }
-    })
+    }
+
   })
 
   const { isLoaded: isMapLoaded, loadError: loadMapError } = useLoadScript({
@@ -129,7 +130,7 @@ const Map = (props) => {
 
         {
           routes.map((route) => {
-            return <Polyline path={route} options={route_options}/>
+            return <Polyline path={route.points} options={route.options}/>
           })
         }
 
@@ -139,19 +140,9 @@ const Map = (props) => {
               options={example_bus_options}
               center={bus}
               radius={20}
-
             />
           })
         }
-
-
-        {/* <Polyline path={gmaps_route} options={route_options} />
-
-        {props.liveData ? <Circle
-          options={example_bus_options}
-          center={gmap_bus_pos}
-          radius={20}
-        /> : ""} */}
       </GoogleMap>
     </>
   );

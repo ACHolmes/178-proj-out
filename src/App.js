@@ -20,8 +20,14 @@ function App() {
             if (liveBus.vehicle.trip.trip_id in route_data[i].trips) {
               const trip_id =  liveBus.vehicle.trip.trip_id;
               const shape_id = route_data[i].trips[trip_id].shape_id;
-              console.log(shape_id);
-              return route_data[i].shapes[shape_id];
+              return {
+                "points": route_data[i].shapes[shape_id].points,
+                "route_id": 777,
+                "route_short_name": "1636",
+                "route_long_name": "1636'er",
+                "route_color": "0099FF",
+                "route_text_color": "FFFFFF"
+              };
             }
           }
           return {points: []};
