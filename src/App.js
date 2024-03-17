@@ -12,7 +12,6 @@ function App() {
         <MapWrapper width={width} height={height}/>
       </DeviceFrameset>
     </div>
-
   );
 }
 
