@@ -1,10 +1,6 @@
 import { GoogleMap, useLoadScript, Polyline, Circle } from '@react-google-maps/api';
 
 const libraries = ['places'];
-const mapContainerStyle = {
-  width: '800px',
-  height: '600px',
-};
 
 // Setting center of the yard as default center
 const default_map_center = {
@@ -43,6 +39,12 @@ const mapOptions = {
 };
 
 const Map = (props) => {
+
+  const mapContainerStyle = {
+    width: `${props.width}px`,
+    height: `${props.height}px`,
+  };
+
   const buses = props.buses.map((bus) => {
     return {
       "position": {

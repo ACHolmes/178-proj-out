@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Map from '../Map';
 import route_data from '../../data/data5.json';
 
-const MapWrapper = () => {
+const MapWrapper = (props) => {
   const [data, setData] = useState(null);
   const [routes, setRoutes] = useState(null);
 
@@ -73,9 +73,7 @@ const MapWrapper = () => {
     <div>
       {data && routes ? (
         <div>
-          {JSON.stringify(data)}
-
-          <Map buses={data.entity} routes={routes}></Map>
+          <Map height={props.height} width={props.width} buses={data.entity} routes={routes}></Map>
         </div>
       ) : (
         <p>Loading...</p>
