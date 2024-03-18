@@ -194,7 +194,9 @@ const StyledRoutes = styled(Container)(({ theme }) => ({
             ))}
           </List>
         ) : (
-          <Typography variant="body1">No routes found.</Typography>
+          <Typography variant="body1">
+                No routes found. :( Try searching from a different stop!
+          </Typography>
         )}
       </StyledRoutes>
     );
