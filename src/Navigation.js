@@ -12,6 +12,7 @@ const Navigation = () => {
     const [showJson, setShowJson] = useState(false);
     const [userInput, setUserInput] = useState({});
     const [timetableData, setTimetableData] = useState(null);
+    const [searchClicked, setSearchClicked] = useState(false); // State to track if search button is clicked
 
     useEffect(() => {
         setTimetableData(jsonTimetableData);
@@ -40,6 +41,7 @@ const Navigation = () => {
 
     const handleSearch = (data) => {
         setUserInput(data);
+        setSearchClicked(true); // Set searchClicked to true when search button is clicked
     };
 
     // Anytime setUserInput completes, calculate new routes
@@ -168,17 +170,27 @@ const Navigation = () => {
             )}
             <h1>Live Map</h1>
             <MapInputForm onSubmit={handleSearch} />
-            <p>looking for routes from {userInput.start} to {userInput.destination}</p>
-            <h4>Suggested routes:</h4>
-            <ul>
-                {fastestRoutes.map((trip, index) => (
-                    <li key={index}>
-                        <h5>Route {trip.routeName}</h5>
-                        <p>Leaving at: {trip.arrivalTime}</p>
-                        <p>Arriving at destination at: {trip.destArrivalTime}</p>
-                    </li>
-                ))}
-            </ul>
+            {searchClicked && userInput.start && userInput.destination && (
+                <>
+                    <p>Routes from {userInput.start} to {userInput.destination}</p>
+                    {fastestRoutes.length > 0 ? (
+                        <div>
+                            <h4>Suggested routes:</h4>
+                            <ul>
+                                {fastestRoutes.map((trip, index) => (
+                                    <li key={index}>
+                                        <h5>Route {trip.routeName}</h5>
+                                        <p>Leaving at: {trip.arrivalTime}</p>
+                                        <p>Arriving at destination at: {trip.destArrivalTime}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : (
+                        <p>No routes found.</p>
+                    )}
+                </>
+            )}
         </div>
     );
 };
