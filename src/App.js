@@ -1,7 +1,7 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import Navigation from './Navigation';
-import Component from './Component';
+import MapWrapper from './MapWrapper';
 
 function App() {
   const [width, height] = [375, 812];
