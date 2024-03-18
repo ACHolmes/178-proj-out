@@ -60,13 +60,20 @@ const MapWrapper = (props) => {
           }
         }
         // If now route that has a trip_id that matches trip_id we found, unknown, return blank result
+        liveBus.vehicle.route_data = {
+          route_id: null,
+          route_short_name: "",
+          route_long_name: "",
+          route_color: "000000",
+          route_text_color: "000000"
+        }
         return {
           points: [],
           route_id: null,
-          route_short_name: null,
-          route_long_name: null,
-          route_color: null,
-          route_text_color: null
+          route_short_name: "",
+          route_long_name: "",
+          route_color: "000000",
+          route_text_color: "000000"
         };
       }))];
 
