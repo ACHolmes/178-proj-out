@@ -40,45 +40,42 @@ const Navigation = () => {
 
     const handleSearch = (data) => {
         setUserInput(data);
-        calculateRoutes();
     };
-    
+
+    // Anytime setUserInput completes, calculate new routes
+    useEffect(() => {
+        calculateRoutes();
+    }, [userInput]);
 
     async function getNextBusArrival(route, stopId) {
         // Convert route to string
         const routeKey = route.toString();
         console.log('stop id is', stopId);
-    
+
         // Check if the route exists in dataByRoute
         const keys = Object.keys(dataByRoute);
         if (!keys.includes(routeKey)) {
             // console.log('route key not present');
             return null;
         }
-        
+
         const routeData = dataByRoute[routeKey];
         console.log('route data is', routeData);
         const currentTime = new Date();
-    
+
         // res should be of form ["tripId1": "next bus arrival", "tripId5": "next bus arrival"]
         // let res = []
         let found = false;
 
         // Iterate through each trip in that route
         for (const tripId in routeData.trips) {
-            // console.log('checking tripid ', tripId);
             const trip = routeData.trips[tripId];
             const stops = trip.stops;
 
             // Iterate through stops to find the specified stop
             for (const stop of stops) {
                 console.log('checking stop ', stop.stop_id);
-                // console.log('stop_id', typeof stop.stop_id);
-                console.log(typeof stopId);
-                console.log(typeof stop.stop_id);
-
                 if (stop.stop_id.toString() === stopId) {
-                    console.log('true');
                     const arrivalTime = new Date(
                         `${currentTime.toDateString()} ${stop.arrival_time}`
                     );
@@ -91,10 +88,10 @@ const Navigation = () => {
                     } else {
                         console.log('bus already came');
                     }
-                    
+
                 }
             }
-         
+
             if (found) break; // only 1 valid result per route
         }
         return null;
@@ -111,14 +108,15 @@ const Navigation = () => {
         return results;
     }
 
+    // Function called whenever a search is fired
     const calculateRoutes = () => {
         const startStopId = stopMappings[userInput.start];
         console.log(startStopId);
         // console.log('startStopId', startStopId);
         const destinationStopId = stopMappings[userInput.destination];
         console.log('in calc routes function');
-        
-        // find routes that go to each stop 
+
+        // find routes that go to each stop
         const startRoutes = routesPerStop[startStopId] || [];
         const destRoutes = routesPerStop[destinationStopId] || [];
 
@@ -131,7 +129,7 @@ const Navigation = () => {
                 setRoutes(routes);
             })
         }
-        
+
     }
 
     return (
