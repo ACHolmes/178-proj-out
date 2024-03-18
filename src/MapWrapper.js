@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Map from '../Map';
-import Search from '../Search';
-import route_data from '../../data/data5.json';
+import Map from './Map';
+import route_data from './data/data5.json';
 
 
 const MapWrapper = (props) => {
@@ -124,7 +123,6 @@ const MapWrapper = (props) => {
 
   return (
     <>
-      <Search height={props.height} width={props.width}/>
       {
         <div>
           <Map

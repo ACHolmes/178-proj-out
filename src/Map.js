@@ -1,5 +1,5 @@
 import { GoogleMap, useLoadScript, Marker, Polyline, Circle, InfoWindow } from '@react-google-maps/api';
-import usermarker from "../../static/usermarker.svg"
+import usermarker from "./static/usermarker.svg"
 import { useState } from 'react';
 const libraries = ['places'];
 
