@@ -1,0 +1,51 @@
+:root {
+    --width: 375px;
+    --height: 812px;
+    --fixed-height: 270px; 
+  }  
+
+li{
+    list-style: none;
+    padding: 0;
+    }
+
+.route-selection-list {
+    margin: 20px;
+    /* position: fixed; */
+    bottom: 10px;
+    width: var(--width);
+    height: var(--fixed-height);
+}
+
+.route-option {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    
+}
+
+.route-text {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    /* border: solid; */
+    border-width: 1px;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 3px 3px 5px #bfbfbf;
+    font-family: Verdana;
+}
+
+.route-name {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.route-eta {
+    color: #666;
+    margin-right: 10px;
+}
+
+.route-travel {
+    color: #666;
+}
