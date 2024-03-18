@@ -205,7 +205,8 @@ const StyledRoutes = styled(Container)(({ theme }) => ({
   return (
     <Box display="flex" flexDirection="column" alignItems="center" marginTop={4}>
       <StyledTypography variant="h4">
-        <img src={LocationPinSvg} alt="Location Pin" style={{ marginRight: '4px', width: '30px' }} /> PassioBetter
+        <a href="." style={{ textDecoration: 'none', color: 'inherit' }}><img src={LocationPinSvg} alt="Location Pin" style={{ marginRight: '4px', width: '30px' }} /> 
+        PassioBetter</a>
       </StyledTypography>
       
       <Container maxWidth="sm">
