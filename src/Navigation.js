@@ -1,159 +1,221 @@
-import MapInputForm from './MapInputForm';
 import React, { useState, useEffect } from 'react';
+import { Typography, List, ListItem, ListItemText, Container, Box } from '@mui/material';
+import MapInputForm from './MapInputForm';
+import { styled } from '@mui/system';
 import jsonTimetableData from './data/timetable.json';
 import stopMappings from './data/stop_mappings.json';
+import routeMappings from './data/route_name_mappings.json';
 import routesPerStop from './data/routes_per_stop.json';
 import dataByRoute from './data/data_by_route.json';
+import LocationPinSvg from './static/location-pin.svg';
+
+// Styled Typography component with Product Sans font
+const StyledTypography = styled(Typography)({
+  fontFamily: 'Product Sans, sans-serif',
+});
+
+const StyledRoutes = styled(Container)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  '& h4': {
+    marginBottom: theme.spacing(1),
+  },
+  '& li': {
+    marginBottom: theme.spacing(2),
+  },
+}));
 
 const Navigation = () => {
-    const [fastestRoutes, setFastestRoutes] = useState([]);
-    const [liveData, setData] = useState(null);
-    const [showJson, setShowJson] = useState(false);
-    const [userInput, setUserInput] = useState({});
-    const [timetableData, setTimetableData] = useState(null);
+  const [fastestRoutes, setFastestRoutes] = useState([]);
+  const [liveData, setData] = useState(null);
+  const [showJson, setShowJson] = useState(false);
+  const [userInput, setUserInput] = useState({});
+  const [timetableData, setTimetableData] = useState(null);
+  const [searchClicked, setSearchClicked] = useState(false);
 
+  useEffect(() => {
+    setTimetableData(jsonTimetableData);
+  }, []);
 
-    useEffect(() => {
-        setTimetableData(jsonTimetableData);
-    }, []);
-
-    useEffect(() => {
-        const fetchData = async () => {
-        const response = await fetch('https://passio3.com/harvard/passioTransit/gtfs/realtime/vehiclePositions.json');
-        const result = await response.json();
-        setData(result);
-        };
-
-        // Get initial data immediately
-        fetchData();
-
-        // Then update data every 2s
-        const interval = setInterval(fetchData, 2000);
-
-        // Clean up interval on unmount
-        return () => clearInterval(interval);
-        }, []);
-
-    const handleButtonClick = () => {
-        setShowJson(prevState => !prevState);
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('https://passio3.com/harvard/passioTransit/gtfs/realtime/vehiclePositions.json');
+      const result = await response.json();
+      setData(result);
     };
 
-    const handleSearch = (data) => {
-        setUserInput(data);
-        // Or could just calculateRoutes(data) here.
-        // Realizing that currently this state is overkill, could just pass as function parameter but it's ok.
-    };
+    // Get initial data immediately
+    fetchData();
 
-    // Anytime setUserInput completes, calculate new routes
-    useEffect(() => {
-        calculateRoutes();
-    }, [userInput]);
+    // Then update data every 2s
+    const interval = setInterval(fetchData, 2000);
 
-    async function getNextBusArrival(route, stopId) {
-        // Convert route to string
-        const routeKey = route.toString();
-        console.log('stop id is', stopId);
+    // Clean up interval on unmount
+    return () => clearInterval(interval);
+  }, []);
 
-        // Check if the route exists in dataByRoute
-        const keys = Object.keys(dataByRoute);
-        if (!keys.includes(routeKey)) {
-            // console.log('route key not present');
-            return null;
-        }
+  const handleButtonClick = () => {
+    setShowJson(prevState => !prevState);
+  };
 
-        const routeData = dataByRoute[routeKey];
-        console.log('route data is', routeData);
-        const currentTime = new Date();
+  const handleSearch = (data) => {
+    setUserInput(data);
+    setSearchClicked(true); // Set searchClicked to true when search button is clicked
+  };
 
-        // res should be of form ["tripId1": "next bus arrival", "tripId5": "next bus arrival"]
-        // let res = []
-        let found = false;
+  // Anytime setUserInput completes, calculate new routes
+  useEffect(() => {
+    calculateRoutes();
+  }, [userInput]);
 
-        // Iterate through each trip in that route
-        for (const tripId in routeData.trips) {
-            const trip = routeData.trips[tripId];
-            const stops = trip.stops;
+  const timeDiff = (arrival, current) => {
+    return (arrival - current) / (1000 * 60 * 60);
+  };
 
-            // Iterate through stops to find the specified stop
-            for (const stop of stops) {
-                console.log('checking stop ', stop.stop_id);
-                if (stop.stop_id.toString() === stopId) {
-                    const arrivalTime = new Date(
-                        `${currentTime.toDateString()} ${stop.arrival_time}`
-                    );
-                    console.log('arrives at', arrivalTime);
-                    console.log('currently', currentTime);
-                    // if valid (upcoming) arrival time, add it and associated tripId to return list
-                    if (arrivalTime > currentTime) {
-                        found = true;
-                        return { "tripId" : tripId,
-                        "arrivalTime": arrivalTime.toLocaleTimeString()
-                        };
-                    } else {
-                        console.log('bus already came');
-                    }
+  const timeToDate = (inputTime) => {
+    const timeString = inputTime;
 
-                }
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const day = today.getDate();
+
+    const [hours, minutes] = timeString.split(':').map(Number);
+
+    const resultDate = new Date(year, month, day, hours, minutes);
+    const localeTimeString = resultDate.toLocaleString();
+    return localeTimeString;
+  };
+
+  async function getNextBusArrival(route, startStop, destStop, depTime = null) {
+    const foundTrips = [];
+
+    const routeData = dataByRoute[route.toString()];
+    if (!routeData) {
+      console.log('can\'t find matching route');
+      return null;
+    }
+    const currentTime = new Date();
+    const departureTime = (depTime) ?
+      new Date(
+        `${currentTime.toDateString()} ${depTime.toString()}`
+      ) : new Date();
+    for (const tripId in routeData.trips) {
+      const trip = routeData.trips[tripId];
+      const stops = trip.stops;
+
+      for (let i = 0; i < stops.length; i++) {
+        const stop = stops[i];
+        if (stop.stop_name === startStop) {
+          const arrivalTime = new Date(
+            `${currentTime.toDateString()} ${stop.arrival_time}`
+          );
+          if ((arrivalTime > departureTime) && timeDiff(arrivalTime, departureTime) < 2) {
+            for (let j = i + 1; j < stops.length; j++) {
+              const next_stop = stops[j];
+              if (next_stop.stop_name === destStop) {
+                const destArrivalTime = new Date(
+                  `${departureTime.toDateString()} ${next_stop.arrival_time}`
+                );
+                const tripInfo = {
+                  "route": route,
+                  "routeName": routeMappings[route],
+                  "tripId": tripId,
+                  "arrivalTime": arrivalTime.toLocaleTimeString(),
+                  "destArrivalTime": destArrivalTime.toLocaleTimeString()
+                };
+                foundTrips.push(tripInfo);
+                break;
+              }
             }
-
-            if (found) break; // only 1 valid result per route
+          }
         }
-        return null;
+      }
     }
 
-    async function fetchBusArrival(routes, startStopId) {
-        const results = [];
-        for (const route of routes) {
-            const tripInfo = await getNextBusArrival(route, startStopId);
-            if (tripInfo) {
-                console.log("trip id is ", tripInfo.tripId);
-                console.log("arrival time is ", tripInfo.arrivalTime);
-                setFastestRoutes([...fastestRoutes, tripInfo])
-            }
-        }
+    foundTrips.sort((a, b) => {
+      const arrivalTimeA = new Date(`2000-01-01 ${a.arrivalTime}`);
+      const arrivalTimeB = new Date(`2000-01-01 ${b.arrivalTime}`);
+      return arrivalTimeA - arrivalTimeB;
+    });
+
+    return foundTrips;
+  }
+
+  async function fetchBusArrival(routes, startStop, destStop, departureTime = null) {
+    const allTrips = [];
+    for (const route of routes) {
+      const tripInfo = await getNextBusArrival(route, startStop, destStop, departureTime);
+      if (tripInfo) {
+        allTrips.push(...tripInfo);
+      }
     }
+    allTrips.sort((a, b) => {
+      const arrivalTimeA = new Date(`2000-01-01 ${a.arrivalTime}`);
+      const arrivalTimeB = new Date(`2000-01-01 ${b.arrivalTime}`);
+      return arrivalTimeA - arrivalTimeB;
+    });
+    setFastestRoutes(allTrips.slice(0, 3));
+  }
 
-    // Function called whenever a search is fired
-    const calculateRoutes = () => {
-        const startStopId = stopMappings[userInput.start];
-        console.log(startStopId);
-        // console.log('startStopId', startStopId);
-        const destinationStopId = stopMappings[userInput.destination];
-        console.log('in calc routes function');
+  const calculateRoutes = () => {
+    const startStopId = stopMappings[userInput.start];
+    const destinationStopId = stopMappings[userInput.destination];
 
-        // find routes that go to each stop
-        const startRoutes = routesPerStop[startStopId] || [];
-        const destRoutes = routesPerStop[destinationStopId] || [];
+    const startRoutes = routesPerStop[startStopId] || [];
+    const destRoutes = routesPerStop[destinationStopId] || [];
 
-        // get list of routes that go between start and dest stops
-        const sharedRoutes = startRoutes.filter(routeId => destRoutes.includes(routeId));
-        if (sharedRoutes) {
-        
-            fetchBusArrival(sharedRoutes, startStopId)
-        }
-
+    const sharedRoutes = startRoutes.filter(routeId => destRoutes.includes(routeId));
+    if (sharedRoutes) {
+      let departureTime = null;
+      if (userInput.departureTime) {
+        departureTime = userInput.departureTime;
+        console.log('departing at ', departureTime);
+      }
+      fetchBusArrival(sharedRoutes, userInput.start, userInput.destination, departureTime);
     }
+  };
 
+  const SuggestedRoutes = ({ userInput, fastestRoutes }) => {
     return (
-        <div>
-            <button onClick={handleButtonClick}>{showJson ? 'Hide JSON' : 'Show JSON'}</button>
-      {showJson && (
-        <div>
-          <h2>Live Data</h2>
-          <pre>{JSON.stringify(liveData, null, 2)}</pre>
-          <h2>Timetable Data</h2>
-          <pre>{JSON.stringify(timetableData, null, 2)}</pre>
-        </div>
-      )}
-        <h1>Live Map</h1>
+      <StyledRoutes>
+        {fastestRoutes.length > 0 ? (
+          <List>
+            <Typography variant="h6">Suggested routes:</Typography>
+            {fastestRoutes.map((trip, index) => (
+              <ListItem key={index}>
+                <ListItemText
+                  primary={`Route ${trip.routeName}`}
+                  secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
+                />
+              </ListItem>
+            ))}
+          </List>
+        ) : (
+          <Typography variant="body1">
+            No routes found. :( Try searching from a different stop!
+          </Typography>
+        )}
+      </StyledRoutes>
+    );
+  };
+
+  return (
+    <Box display="flex" flexDirection="column" alignItems="center" marginTop={4}>
+      <StyledTypography variant="h4">
+        <a href="." style={{ textDecoration: 'none', color: 'inherit' }}>
+          <img src={LocationPinSvg} alt="Location Pin" style={{ marginRight: '4px', width: '30px' }} />
+          PassioBetter
+        </a>
+      </StyledTypography>
+      
+      <Container maxWidth="sm">
         <MapInputForm onSubmit={handleSearch} />
-        <p>looking for routes from {userInput.start} to {userInput.destination}</p>
-        <h4>Suggested routes:</h4>
-        {fastestRoutes.map((trip) => (
-            <p key={trip.tripId}>Trip Id {trip.tripId}: Arriving next at {trip.arrivalTime}</p>
-        ))}
-        </div>
-        );
+        {searchClicked && userInput.start && userInput.destination && (
+          <SuggestedRoutes userInput={userInput} fastestRoutes={fastestRoutes} />
+        )}
+      </Container>
+    </Box>
+  );
 };
 
 export default Navigation;
