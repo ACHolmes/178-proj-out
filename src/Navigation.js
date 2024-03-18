@@ -50,6 +50,9 @@ const Navigation = () => {
         calculateRoutes();
     }, [userInput]);
 
+    const timeDiff = (arrival, current) => {
+        return (arrival - current) / (1000 * 60 * 60);
+    }
 
     async function getNextBusArrival(route, startStop, destStop) {
         const foundTrips = [];
@@ -75,7 +78,8 @@ const Navigation = () => {
                     const arrivalTime = new Date(
                         `${currentTime.toDateString()} ${stop.arrival_time}`
                     );
-                    if (arrivalTime > currentTime) {
+                    // check if bus will arrive in future, and in less than 2 hours
+                    if ((arrivalTime > currentTime) && timeDiff(arrivalTime, currentTime) < 2) {
                         // check if will reach destination stop
                         for (let j = i + 1; j < stops.length; j++) {
                             const next_stop = stops[j];
@@ -95,10 +99,7 @@ const Navigation = () => {
                             }
                         }
                         
-                    } else {
-                        console.log('bus already came');
                     }
-
                 }
             }
         }
@@ -113,15 +114,22 @@ const Navigation = () => {
     }
 
     async function fetchBusArrival(routes, startStop, destStop) {
+        const allTrips = []; // Temporary array to accumulate all trips
         for (const route of routes) {
             console.log('checking route', route, ' of ', routes );
             const tripInfo = await getNextBusArrival(route, startStop, destStop);
             if (tripInfo) {
                 console.log('routes are', fastestRoutes);
                 console.log('trip info is', tripInfo);
-                setFastestRoutes(tripInfo);
+                allTrips.push(...tripInfo); // Add the trip info to the temporary array
             }
         }
+        allTrips.sort((a, b) => {
+            const arrivalTimeA = new Date(`2000-01-01 ${a.arrivalTime}`);
+            const arrivalTimeB = new Date(`2000-01-01 ${b.arrivalTime}`);
+            return arrivalTimeA - arrivalTimeB;
+        });
+        setFastestRoutes(allTrips.slice(0,3)); // Set the state after all trips have been collected
     }
 
     // Function called whenever a search is fired
