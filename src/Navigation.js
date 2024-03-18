@@ -7,6 +7,7 @@ import stopMappings from './data/stop_mappings.json';
 import routeMappings from './data/route_name_mappings.json';
 import routesPerStop from './data/routes_per_stop.json';
 import dataByRoute from './data/data_by_route.json';
+import LocationPinSvg from './static/location-pin.svg';
 
 // Styled Typography component with Product Sans font
 const StyledTypography = styled(Typography)({
@@ -201,7 +202,10 @@ const StyledRoutes = styled(Container)(({ theme }) => ({
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" marginTop={4}>
-      <StyledTypography variant="h4">PassioBetter</StyledTypography>
+      <StyledTypography variant="h4">
+        <img src={LocationPinSvg} alt="Location Pin" style={{ marginRight: '4px', width: '30px' }} /> PassioBetter
+      </StyledTypography>
+      
       <Container maxWidth="sm">
         <MapInputForm onSubmit={handleSearch} />
         {searchClicked && userInput.start && userInput.destination && (
