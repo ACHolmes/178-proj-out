@@ -59,7 +59,6 @@ function MapInputForm({ onSubmit }) {
         <div>
           <label>Start:</label>
           <select value={start} onChange={handleStartChange}>
-            <option value="">Select start location</option>
             {/* Iterate through stopOptions and generate option elements */}
             {stopOptions.map((option, index) => (
               <option key={index} value={option}>{option}</option>
@@ -69,7 +68,6 @@ function MapInputForm({ onSubmit }) {
         <div>
           <label>Destination:</label>
           <select value={destination} onChange={handleDestinationChange}>
-            <option value="">Select destination location</option>
             {/* Iterate through stopOptions and generate option elements */}
             {stopOptions.map((option, index) => (
               <option key={index} value={option}>{option}</option>

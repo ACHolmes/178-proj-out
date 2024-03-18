@@ -1,7 +1,8 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
 import Navigation from './Navigation';
 import MapWrapper from './MapWrapper';
+import { DeviceFrameset } from 'react-device-frameset'
+import 'react-device-frameset/styles/marvel-devices.min.css'
 
 function App() {
   const [width, height] = [375, 812];
@@ -9,7 +10,9 @@ function App() {
     <div>
       <Navigation />
       <div style={{display: "flex", flexDirection:"row", width: "100%", justifyContent: "center"}}>
-        <MapWrapper width={width} height={height}/>
+        <DeviceFrameset device="iPhone X" width={width} height={height} zoom={0.9}>
+          <MapWrapper width={width} height={height}/>
+        </DeviceFrameset>
       </div>
     </div>
   );
