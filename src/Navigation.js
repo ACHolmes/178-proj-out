@@ -40,6 +40,8 @@ const Navigation = () => {
 
     const handleSearch = (data) => {
         setUserInput(data);
+        // Or could just calculateRoutes(data) here.
+        // Realizing that currently this state is overkill, could just pass as function parameter but it's ok.
     };
 
     // Anytime setUserInput completes, calculate new routes
