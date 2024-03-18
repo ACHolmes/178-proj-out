@@ -1,5 +1,5 @@
 import { GoogleMap, useLoadScript, Marker, Polyline, Circle } from '@react-google-maps/api';
-import usermarker from "../../static/usermarker.svg"
+import usermarker from "./static/usermarker.svg"
 const libraries = ['places'];
 
 // Setting center of the yard as default center
