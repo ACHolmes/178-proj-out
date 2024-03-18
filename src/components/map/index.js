@@ -1,5 +1,6 @@
-import { GoogleMap, useLoadScript, Marker, Polyline, Circle } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, Marker, Polyline, Circle, InfoWindow } from '@react-google-maps/api';
 import usermarker from "../../static/usermarker.svg"
+import { useState } from 'react';
 const libraries = ['places'];
 
 // Setting center of the yard as default center
@@ -24,8 +25,6 @@ const styles = {
   ],
 };
 
-
-
 // Setting map options to remove some of the buttons (e.g. street-view) and restrict user (e.g. shouldn't
 // be able to zoom mega far out, bad user experience trying to refind campus).
 const mapOptions = {
@@ -42,8 +41,8 @@ const mapOptions = {
 
 const Map = (props) => {
 
-  // console.log("stops here");
-  console.log(props.stops);
+  const [selectedStop, setSelectedStop] = useState(null);
+
   const mapContainerStyle = {
     width: `${props.width}px`,
     height: `${props.height}px`,
@@ -135,13 +134,26 @@ const Map = (props) => {
         }
 
         {
-          props.stops && props.stops.map((stop) => {
+          props.stops &&  (
+            props.stops.map((stop) => {
             return <Marker
               position={stop.position}
+              title={stop.stop_name}
+              clickable={true}
+              onClick={() => setSelectedStop(stop)}
             />
           })
+          )
         }
 
+        {selectedStop && (
+          <InfoWindow
+            position={selectedStop.position}
+            onCloseClick={() => setSelectedStop(null)}
+          >
+            <div>{selectedStop.stop_name}</div>
+          </InfoWindow>
+        )}
       </GoogleMap>
 
 
