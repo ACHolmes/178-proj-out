@@ -4,6 +4,7 @@ function MapInputForm({ onSubmit }) {
   // Define state variables for start and destination locations
   const [start, setStart] = useState('Quad');
   const [destination, setDestination] = useState('SEC');
+  const [departureTime, setDepartureTime] = useState('');
 
   // Define function to handle start location change
   const handleStartChange = (event) => {
@@ -15,11 +16,16 @@ function MapInputForm({ onSubmit }) {
     setDestination(event.target.value);
   };
 
+  // Define function to handle departure time change
+  const handleDepartureTimeChange = (event) => {
+    setDepartureTime(event.target.value);
+  };
+
   // Define function to handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
     // Call the onSubmit callback function with form data
-    onSubmit({ start, destination });
+    onSubmit({ start, destination, departureTime });
   };
 
   // Define array of stop options
@@ -73,6 +79,10 @@ function MapInputForm({ onSubmit }) {
               <option key={index} value={option}>{option}</option>
             ))}
           </select>
+        </div>
+        <div>
+          <label>Departure Time:</label>
+          <input type="time" value={departureTime} onChange={handleDepartureTimeChange} />
         </div>
         <button type="submit">Submit</button>
       </form>

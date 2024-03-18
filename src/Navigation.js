@@ -51,7 +51,22 @@ const Navigation = () => {
         return (arrival - current) / (1000 * 60 * 60);
     }
 
-    async function getNextBusArrival(route, startStop, destStop) {
+    const timeToDate = (inputTime) => {
+        const timeString = inputTime;
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const day = today.getDate();
+
+        const [hours, minutes] = timeString.split(':').map(Number);
+
+        const resultDate = new Date(year, month, day, hours, minutes);
+        const localeTimeString = resultDate.toLocaleString();
+        return localeTimeString;
+    }
+
+    async function getNextBusArrival(route, startStop, destStop, depTime = null) {
         const foundTrips = [];
 
         const routeData = dataByRoute[route.toString()];
@@ -59,9 +74,11 @@ const Navigation = () => {
             console.log('can\'t find matching route');
             return null;
         }
-        
         const currentTime = new Date();
-
+        const departureTime = (depTime) ?
+            new Date(
+                `${currentTime.toDateString()} ${depTime.toString()}`
+            ) : new Date();
         for (const tripId in routeData.trips) {
             const trip = routeData.trips[tripId];
             const stops = trip.stops;
@@ -72,12 +89,12 @@ const Navigation = () => {
                     const arrivalTime = new Date(
                         `${currentTime.toDateString()} ${stop.arrival_time}`
                     );
-                    if ((arrivalTime > currentTime) && timeDiff(arrivalTime, currentTime) < 2) {
+                    if ((arrivalTime > departureTime) && timeDiff(arrivalTime, departureTime) < 2) {
                         for (let j = i + 1; j < stops.length; j++) {
                             const next_stop = stops[j];
                             if (next_stop.stop_name === destStop) {
                                 const destArrivalTime = new Date(
-                                    `${currentTime.toDateString()} ${next_stop.arrival_time}`
+                                    `${departureTime.toDateString()} ${next_stop.arrival_time}`
                                 );
                                 const tripInfo = { 
                                     "route": route,
@@ -94,20 +111,20 @@ const Navigation = () => {
                 }
             }
         }
-        
+
         foundTrips.sort((a, b) => {
             const arrivalTimeA = new Date(`2000-01-01 ${a.arrivalTime}`);
             const arrivalTimeB = new Date(`2000-01-01 ${b.arrivalTime}`);
             return arrivalTimeA - arrivalTimeB;
         });
-        
+
         return foundTrips;
     }
 
-    async function fetchBusArrival(routes, startStop, destStop) {
+    async function fetchBusArrival(routes, startStop, destStop, departureTime = null) {
         const allTrips = [];
         for (const route of routes) {
-            const tripInfo = await getNextBusArrival(route, startStop, destStop);
+            const tripInfo = await getNextBusArrival(route, startStop, destStop, departureTime);
             if (tripInfo) {
                 allTrips.push(...tripInfo);
             }
@@ -129,9 +146,13 @@ const Navigation = () => {
 
         const sharedRoutes = startRoutes.filter(routeId => destRoutes.includes(routeId));
         if (sharedRoutes) {
-            fetchBusArrival(sharedRoutes, userInput.start, userInput.destination)
+            let departureTime = null;
+            if (userInput.departureTime) {
+                departureTime = userInput.departureTime;
+                console.log('departing at ', departureTime);
+            }
+            fetchBusArrival(sharedRoutes, userInput.start, userInput.destination, departureTime);
         }
-
     }
 
     return (
