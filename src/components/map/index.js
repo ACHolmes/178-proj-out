@@ -42,6 +42,8 @@ const mapOptions = {
 
 const Map = (props) => {
 
+  // console.log("stops here");
+  console.log(props.stops);
   const mapContainerStyle = {
     width: `${props.width}px`,
     height: `${props.height}px`,
@@ -131,7 +133,18 @@ const Map = (props) => {
             icon={usermarker}
           />
         }
+
+        {
+          props.stops && props.stops.map((stop) => {
+            return <Marker
+              position={stop.position}
+            />
+          })
+        }
+
       </GoogleMap>
+
+
     </>
   );
 }

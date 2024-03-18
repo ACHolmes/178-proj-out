@@ -5,8 +5,9 @@ import route_data from '../../data/data5.json';
 
 
 const MapWrapper = (props) => {
-  const [data, setData] = useState(null);
+  const [data, setData]     = useState(null);
   const [routes, setRoutes] = useState(null);
+  const [stops, setStops]   = useState(null);
   const [userLocation, setUserLocation] = useState(null);
 
   const updateLocation = () => {
@@ -21,7 +22,7 @@ const MapWrapper = (props) => {
   }
 
   function error(position) {
-    console.log("unable to get current position");
+    console.log("unable to get current position, might not have location enabled on device.");
   }
 
   const fetchData = async () => {
@@ -29,8 +30,10 @@ const MapWrapper = (props) => {
     const result = await response.json();
     if ("entity" in result) {
 
+      const liveBusData = result.entity;
+
       // First setting up all the routes
-      setRoutes([...new Set(result.entity.map((liveBus) => {
+      const new_routes = [...new Set(liveBusData.map((liveBus) => {
         for (let i = 0; i < route_data.length; i++) {
           // Finding data about the trip for each bus
           if (liveBus.vehicle.trip.trip_id in route_data[i].trips) {
@@ -66,10 +69,36 @@ const MapWrapper = (props) => {
           route_color: null,
           route_text_color: null
         };
-      }))]);
+      }))];
+
+
+      // Getting all stops that these routes hit
+      const new_route_stops = [...new Set(liveBusData.map((liveBus) => {
+        for (const route_info of route_data) {
+          for (const trip_info of Object.values(route_info.trips)) {
+            // TODO: Check whether this can be ===
+            if (trip_info.trip_id == liveBus.vehicle.trip.trip_id) {
+              return trip_info.stops.map((stop) => {
+                return {
+                  stop_id: stop.stop_id,
+                  stop_code: stop.stop_code,
+                  stop_name: stop.stop_name,
+                  position: {
+                    lat: stop.stop_lat,
+                    lng: stop.stop_lon
+                  }
+                }
+              })
+            }
+          }
+        }
+        return {};
+      }).flat())];
 
       // Then setting the live bus data
+      setRoutes(new_routes);
       setData(result);
+      setStops(new_route_stops);
     } else {
       console.log("No entity returned by API. API either being refreshed, no bus data currently or I guess maybe got ratelimited or similar?");
       console.log(result);
@@ -104,6 +133,7 @@ const MapWrapper = (props) => {
             buses={data ? (data.entity) : []}
             routes={routes ? routes : []}
             userLocation={userLocation && userLocation}
+            stops={stops && stops}
             >
 
           </Map>
