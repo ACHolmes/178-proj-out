@@ -87,38 +87,48 @@ function MapInputForm({ onSubmit }) {
             </Grid>
     }
 
-    const TimeInput = () => {
-      return <Grid item xs={12} md={6}>
-          <StyledTextField
-              label="Departure Time"
-              type="time"
-              value={departureTime}
-              onChange={handleDepartureTimeChange}
-              InputLabelProps={{
-                  shrink: true,
-              }}
-          />
-      </Grid>
-    }
-
-    const SubmitButton = () => {
-      return <Grid item xs={12}>
-                <Button type="submit" variant="contained" color="primary">Search</Button>
-            </Grid>
-    }
-
     return (
         <div>
             <Typography variant="h6" >Navigation</Typography>
             <form onSubmit={handleSubmit}>
                 <Grid container spacing={2}>
-                    <StartInput />
-                    <DestinationInput />
+                <Grid item xs={12} md={6}>
+                    <StyledFormControl>
+                        <InputLabel>Start</InputLabel>
+                        <Select value={start} onChange={handleStartChange}>
+                            {stopOptions.map((option, index) => (
+                                <MenuItem key={index} value={option}>{option}</MenuItem>
+                            ))}
+                        </Select>
+                    </StyledFormControl>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <StyledFormControl>
+                        <InputLabel>Destination</InputLabel>
+                        <Select value={destination} onChange={handleDestinationChange}>
+                            {stopOptions.map((option, index) => (
+                                <MenuItem key={index} value={option}>{option}</MenuItem>
+                            ))}
+                        </Select>
+                    </StyledFormControl>
+                </Grid>
                     <ScheduleToggle />
                     {isDepartureScheduled && (
-                        <TimeInput />
+                        <Grid item xs={12} md={6}>
+                            <StyledTextField
+                                label="Departure Time"
+                                type="time"
+                                value={departureTime}
+                                onChange={handleDepartureTimeChange}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                        </Grid>
                     )}
-                    <SubmitButton />
+                    <Grid item xs={12}>
+                        <Button type="submit" variant="contained" color="primary">Search</Button>
+                    </Grid>
                 </Grid>
             </form>
         </div>
