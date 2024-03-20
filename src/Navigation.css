@@ -15,4 +15,11 @@
 
 .MuiListItemText-primary {
     text-align: left;
+    /* font-weight: bold; */
+}
+
+.selectedRoute {
+    /* background-color: aqua; */
+    font-weight: bold;
+    border: solid;
 }

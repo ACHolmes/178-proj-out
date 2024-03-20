@@ -9,8 +9,8 @@ import routesPerStop from './data/routes_per_stop.json';
 import dataByRoute from './data/data_by_route.json';
 import LocationPinSvg from './static/location-pin.svg';
 import RouteOptions from './RouteOptions';
-import Collapsible from 'react-collapsible';
 import Timeline from './Timeline';
+import './Navigation.css';
 
 // Styled Typography component with Product Sans font
 const StyledTypography = styled(Typography)({
@@ -27,8 +27,6 @@ const StyledRoutes = styled(Container)(({ theme }) => ({
   },
 }));
 
-
-
 const Navigation = () => {
   const [fastestRoutes, setFastestRoutes] = useState([]);
   const [liveData, setData] = useState(null);
@@ -36,10 +34,10 @@ const Navigation = () => {
   const [userInput, setUserInput] = useState({});
   const [timetableData, setTimetableData] = useState(null);
   const [searchClicked, setSearchClicked] = useState(false);
-  const [openIndex, setOpenIndex] = useState(null);
+  const [selectedRoute, setSelectedRoute] = useState(null);
 
-  const handleToggle = (index) => {
-    setOpenIndex((prevIndex) => (prevIndex === index ? null : index));
+  const handleRouteClick = (index) => {
+    setSelectedRoute((prevIndex) => (prevIndex === index ? null : index));
   };
 
   useEffect(() => {
@@ -117,12 +115,6 @@ const Navigation = () => {
         let startInd;
         let endInd;
         let route_stops = [];
-
-        // if (stop.stop_name === startStop) {
-        //   startInd = i;
-        // }
-
-        // if (stop.stop_name === )
         
         const stop = stops[i];
         if (stop.stop_name === startStop) {
@@ -214,15 +206,15 @@ const Navigation = () => {
           <List>
             <Typography variant="h6">Suggested routes:</Typography>
             {fastestRoutes.map((trip, index) => (
-              <ListItem key={index}>
+              <ListItem key={index} className={selectedRoute === index ? 'selectedRoute' : ''}>
                 <div className="routeOption">
-                <ListItemText
+                <ListItemText 
                   primary={`Route ${trip.routeName}`}
                   secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
-                  onClick={() => handleToggle(index)}
-                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleRouteClick(index)}
+                  style={{ cursor: 'pointer', fontWeight: selectedRoute === index ? 'bold' : 'normal'  }}
                 />
-                <Collapse in={openIndex === index}>
+                <Collapse in={selectedRoute === index}>
                 <div className="routeTL">
                 <Timeline stops={trip.stopsInfo}/>
                 </div>
@@ -255,9 +247,7 @@ const Navigation = () => {
         <MapInputForm onSubmit={handleSearch} />
         {searchClicked && userInput.start && userInput.destination && (
           <SuggestedRoutes userInput={userInput} fastestRoutes={fastestRoutes} />
-          // <Timeline stops={fastestRoutes.tripInfo.stopsInfo}/>
         )}
-        {/* <Timeline stops={fastestRoutes.tripInfo.stopsInfo}/> */}
       </Container>
     </Box>
   );
