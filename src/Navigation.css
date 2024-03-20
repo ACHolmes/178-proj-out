@@ -1,0 +1,18 @@
+
+.routeOption {
+    display: flex;
+    flex-direction: column;
+}
+
+/* .routeTL {
+    
+} */
+
+
+.shortRouteDis {
+    text-align: left;
+} 
+
+.MuiListItemText-primary {
+    text-align: left;
+}

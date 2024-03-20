@@ -210,11 +210,14 @@ const Navigation = () => {
             <Typography variant="h6">Suggested routes:</Typography>
             {fastestRoutes.map((trip, index) => (
               <ListItem key={index}>
-                <ListItemText
+                <Collapsible trigger={<ListItemText
                   primary={`Route ${trip.routeName}`}
                   secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
-                />
+                />}>
+                <div className="routeTL">
                 <Timeline stops={trip.stopsInfo}/>
+                </div>
+                </Collapsible>
               </ListItem>
               
             ))}
