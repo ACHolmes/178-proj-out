@@ -10,6 +10,7 @@ ul, li{
 list-style: none;
 padding: 0;
 }
+/* .list-contain */
 
 .container{
 display: flex;
@@ -48,7 +49,7 @@ border-radius: 12px;
 position: relative;
 }
 
-li{
+.list-contain{
 padding-bottom: 1.5rem;
 border-left: 3px solid #abaaed;
 position: relative;

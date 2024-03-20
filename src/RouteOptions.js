@@ -4,7 +4,7 @@ import './RouteOptions.css';
 const RouteOptions = ({routes}) =>  {
     return (
         <div className="route-selection-list">
-            <h2>Route Selectors</h2>
+            {/* <h2>Route Selectors</h2> */}
         <div className="route-option">
             {routes.map((route, index) => ( //will reconfig to data formatting in the morn
             

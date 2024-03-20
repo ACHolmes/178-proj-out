@@ -8,6 +8,9 @@ import routeMappings from './data/route_name_mappings.json';
 import routesPerStop from './data/routes_per_stop.json';
 import dataByRoute from './data/data_by_route.json';
 import LocationPinSvg from './static/location-pin.svg';
+import RouteOptions from './RouteOptions';
+import Collapsible from 'react-collapsible';
+import Timeline from './Timeline';
 
 // Styled Typography component with Product Sans font
 const StyledTypography = styled(Typography)({
@@ -23,6 +26,8 @@ const StyledRoutes = styled(Container)(({ theme }) => ({
     marginBottom: theme.spacing(2),
   },
 }));
+
+
 
 const Navigation = () => {
   const [fastestRoutes, setFastestRoutes] = useState([]);
@@ -104,8 +109,19 @@ const Navigation = () => {
       const stops = trip.stops;
 
       for (let i = 0; i < stops.length; i++) {
+        let startInd;
+        let endInd;
+        let route_stops = [];
+
+        // if (stop.stop_name === startStop) {
+        //   startInd = i;
+        // }
+
+        // if (stop.stop_name === )
+        
         const stop = stops[i];
         if (stop.stop_name === startStop) {
+          startInd = i;
           const arrivalTime = new Date(
             `${currentTime.toDateString()} ${stop.arrival_time}`
           );
@@ -113,6 +129,16 @@ const Navigation = () => {
             for (let j = i + 1; j < stops.length; j++) {
               const next_stop = stops[j];
               if (next_stop.stop_name === destStop) {
+                endInd = j; //edit
+                for (let k = startInd; k <= endInd; k++) {
+                  var obj = {};
+                  const route_stop = stops[k];
+                  const route_stopName = route_stop.stop_name;
+                  const route_stopTime = route_stop.arrival_time
+                  const newRoute_stopTime = new Date( `${currentTime.toDateString()} ${route_stopTime}`);
+                  obj = { "name": route_stopName, "time": newRoute_stopTime.toLocaleTimeString()};
+                  route_stops.push(obj); 
+                }
                 const destArrivalTime = new Date(
                   `${departureTime.toDateString()} ${next_stop.arrival_time}`
                 );
@@ -121,7 +147,8 @@ const Navigation = () => {
                   "routeName": routeMappings[route],
                   "tripId": tripId,
                   "arrivalTime": arrivalTime.toLocaleTimeString(),
-                  "destArrivalTime": destArrivalTime.toLocaleTimeString()
+                  "destArrivalTime": destArrivalTime.toLocaleTimeString(),
+                  "stopsInfo": route_stops
                 };
                 foundTrips.push(tripInfo);
                 break;
@@ -187,7 +214,9 @@ const Navigation = () => {
                   primary={`Route ${trip.routeName}`}
                   secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
                 />
+                <Timeline stops={trip.stopsInfo}/>
               </ListItem>
+              
             ))}
           </List>
         ) : (
@@ -195,6 +224,7 @@ const Navigation = () => {
             No routes found. :( Try searching from a different stop!
           </Typography>
         )}
+        
       </StyledRoutes>
     );
   };
@@ -212,10 +242,13 @@ const Navigation = () => {
         <MapInputForm onSubmit={handleSearch} />
         {searchClicked && userInput.start && userInput.destination && (
           <SuggestedRoutes userInput={userInput} fastestRoutes={fastestRoutes} />
+          // <Timeline stops={fastestRoutes.tripInfo.stopsInfo}/>
         )}
+        {/* <Timeline stops={fastestRoutes.tripInfo.stopsInfo}/> */}
       </Container>
     </Box>
   );
 };
 
 export default Navigation;
+

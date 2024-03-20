@@ -7,7 +7,7 @@ import { DeviceFrameset } from 'react-device-frameset'
 import 'react-device-frameset/styles/marvel-devices.min.css'
 
 const dumbStops = [ // very dumb, will probably have to restructure
-  { name: 'Stop 1', time: '8:00 AM' },
+  { name: 'Stop 1', time: '8:00 AM' }, //ask what data structure this is later?
   { name: 'Stop 2', time: '8:15 AM' },
   { name: 'Stop 3', time: '8:30 AM' },
   { name: 'Stop 4', time: '8:45 AM' },
