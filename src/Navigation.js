@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, List, ListItem, ListItemText, Container, Box } from '@mui/material';
+import { Typography, List, ListItem, ListItemText, Container, Box, Collapse, ExpandLess, ExpandMore } from '@mui/material';
 import MapInputForm from './MapInputForm';
 import { styled } from '@mui/system';
 import jsonTimetableData from './data/timetable.json';
@@ -36,6 +36,11 @@ const Navigation = () => {
   const [userInput, setUserInput] = useState({});
   const [timetableData, setTimetableData] = useState(null);
   const [searchClicked, setSearchClicked] = useState(false);
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const handleToggle = (index) => {
+    setOpenIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
 
   useEffect(() => {
     setTimetableData(jsonTimetableData);
@@ -210,14 +215,19 @@ const Navigation = () => {
             <Typography variant="h6">Suggested routes:</Typography>
             {fastestRoutes.map((trip, index) => (
               <ListItem key={index}>
-                <Collapsible trigger={<ListItemText
+                <div className="routeOption">
+                <ListItemText
                   primary={`Route ${trip.routeName}`}
                   secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
-                />}>
+                  onClick={() => handleToggle(index)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <Collapse in={openIndex === index}>
                 <div className="routeTL">
                 <Timeline stops={trip.stopsInfo}/>
                 </div>
-                </Collapsible>
+                </Collapse>
+                </div>
               </ListItem>
               
             ))}
