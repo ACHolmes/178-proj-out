@@ -32,7 +32,6 @@ const Navigation = () => {
   const [liveData, setData] = useState(null);
   const [showJson, setShowJson] = useState(false);
   const [userInput, setUserInput] = useState({});
-  const [timetableData, setTimetableData] = useState(null);
   const [searchClicked, setSearchClicked] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
 
@@ -40,9 +39,6 @@ const Navigation = () => {
     setSelectedRoute((prevIndex) => (prevIndex === index ? null : index));
   };
 
-  useEffect(() => {
-    setTimetableData(jsonTimetableData);
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,21 +73,6 @@ const Navigation = () => {
 
   const timeDiff = (arrival, current) => {
     return (arrival - current) / (1000 * 60 * 60);
-  };
-
-  const timeToDate = (inputTime) => {
-    const timeString = inputTime;
-
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const day = today.getDate();
-
-    const [hours, minutes] = timeString.split(':').map(Number);
-
-    const resultDate = new Date(year, month, day, hours, minutes);
-    const localeTimeString = resultDate.toLocaleString();
-    return localeTimeString;
   };
 
   async function getNextBusArrival(route, startStop, destStop, depTime = null) {
@@ -199,8 +180,21 @@ const Navigation = () => {
     }
   };
 
-  const SuggestedRoutes = ({ userInput, fastestRoutes }) => {
-    return (
+  return (
+    <Box display="flex" flexDirection="column" alignItems="center" marginTop={4}>
+      <StyledTypography variant="h4">
+        <a href="." style={{ textDecoration: 'none', color: 'inherit' }}>
+          <img src={LocationPinSvg} alt="Location Pin" style={{ marginRight: '4px', width: '30px' }} />
+          PassioBetter
+        </a>
+      </StyledTypography>
+      
+      <Container maxWidth="sm">
+        <MapInputForm onSubmit={handleSearch} />
+        {/* {searchClicked && userInput.start && userInput.destination && (
+          <SuggestedRoutes />
+        )} */}
+              {searchClicked && userInput.start && userInput.destination && (
       <StyledRoutes>
         {fastestRoutes.length > 0 ? (
           <List>
@@ -216,7 +210,24 @@ const Navigation = () => {
                 />
                 <Collapse in={selectedRoute === index}>
                 <div className="routeTL">
-                <Timeline stops={trip.stopsInfo}/>
+                {/* <Timeline stops={trip.stopsInfo}/> */}
+                <div class="container">
+                  <div class="wrapper">
+                    <h2> Route Timeline </h2>
+                    <ul class="sessions">
+                    {trip.stopsInfo.map((stop, index) => (
+                      <div className="list-contain">
+                      <li>
+                        <div key={index} className="timeline-stop">
+                          <div className="stop-name">{stop.name}</div>
+                          <div className="stop-time">{stop.time}</div>
+                        </div>
+                      </li>
+                      </div>
+                      ))}
+                    </ul>
+                  </div>
+                </div> 
                 </div>
                 </Collapse>
                 </div>
@@ -231,23 +242,8 @@ const Navigation = () => {
         )}
         
       </StyledRoutes>
-    );
-  };
+      )}
 
-  return (
-    <Box display="flex" flexDirection="column" alignItems="center" marginTop={4}>
-      <StyledTypography variant="h4">
-        <a href="." style={{ textDecoration: 'none', color: 'inherit' }}>
-          <img src={LocationPinSvg} alt="Location Pin" style={{ marginRight: '4px', width: '30px' }} />
-          PassioBetter
-        </a>
-      </StyledTypography>
-      
-      <Container maxWidth="sm">
-        <MapInputForm onSubmit={handleSearch} />
-        {searchClicked && userInput.start && userInput.destination && (
-          <SuggestedRoutes userInput={userInput} fastestRoutes={fastestRoutes} />
-        )}
       </Container>
     </Box>
   );
