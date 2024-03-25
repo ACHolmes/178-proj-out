@@ -109,15 +109,16 @@ const Map = (props) => {
 
         {/* Draw each route! */}
         {
-          routes.map((route) => {
-            return <Polyline path={route.points} options={route.options}/>
+          routes.map((route, idx) => {
+            return <Polyline key={idx} path={route.points} options={route.options}/>
           })
         }
 
         {/* Draw each bus! */}
         {
-          buses.map((bus) => {
+          buses.map((bus, idx) => {
             return <Circle
+              key={idx}
               options={bus.options}
               center={bus.position}
               radius={bus.radius}
@@ -135,8 +136,9 @@ const Map = (props) => {
 
         {
           props.stops &&  (
-            props.stops.map((stop) => {
+            props.stops.map((stop, idx) => {
             return <Marker
+              key={idx}
               position={stop.position}
               title={stop.stop_name}
               clickable={true}
