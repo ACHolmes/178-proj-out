@@ -17,7 +17,7 @@ const MapWrapper = (props) => {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
     setUserLocation({ lat: latitude, lng: longitude });
-    console.log(`user lat: ${latitude}, user lng: ${longitude}`);
+    // console.log(`user lat: ${latitude}, user lng: ${longitude}`);
   }
 
   function error(position) {

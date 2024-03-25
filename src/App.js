@@ -1,8 +1,6 @@
 import './App.css';
 import Navigation from './Navigation';
 import MapWrapper from './MapWrapper';
-import Timeline from './Timeline';
-import RouteOptions from './RouteOptions';
 import { DeviceFrameset } from 'react-device-frameset'
 import 'react-device-frameset/styles/marvel-devices.min.css'
 
