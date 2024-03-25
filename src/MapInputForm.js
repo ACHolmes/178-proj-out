@@ -66,7 +66,7 @@ function MapInputForm({ onSubmit }) {
         return (
             <Grid item xs={12} md={6}>
                 <Box display="flex" alignItems="center">
-                    <Typography variant="subtitle1">Schedule Departure Time</Typography>
+                    <Typography variant="subtitle1">Schedule departure time</Typography>
                     <Switch checked={isDepartureScheduled} onChange={handleToggleDepartureTime} />
                 </Box>
             </Grid>
