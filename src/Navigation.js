@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, List, ListItem, ListItemText, Container, Box, Collapse, ExpandLess, ExpandMore } from '@mui/material';
+import { Typography, List, ListItem, ListItemText, Container, Box, Collapse, Slide } from '@mui/material';
 import MapInputForm from './MapInputForm';
 import { styled } from '@mui/system';
 import jsonTimetableData from './data/timetable.json';
@@ -35,6 +35,7 @@ const Navigation = () => {
   const [timetableData, setTimetableData] = useState(null);
   const [searchClicked, setSearchClicked] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const options = {hour: "numeric", minute: "numeric"};
 
   const handleRouteClick = (index) => {
     setSelectedRoute((prevIndex) => (prevIndex === index ? null : index));
@@ -133,7 +134,7 @@ const Navigation = () => {
                   const route_stopName = route_stop.stop_name;
                   const route_stopTime = route_stop.arrival_time
                   const newRoute_stopTime = new Date( `${currentTime.toDateString()} ${route_stopTime}`);
-                  obj = { "name": route_stopName, "time": newRoute_stopTime.toLocaleTimeString()};
+                  obj = { "name": route_stopName, "time": newRoute_stopTime.toLocaleTimeString("en-US", options)};
                   route_stops.push(obj); 
                 }
                 const destArrivalTime = new Date(
@@ -143,8 +144,8 @@ const Navigation = () => {
                   "route": route,
                   "routeName": routeMappings[route],
                   "tripId": tripId,
-                  "arrivalTime": arrivalTime.toLocaleTimeString(),
-                  "destArrivalTime": destArrivalTime.toLocaleTimeString(),
+                  "arrivalTime": arrivalTime.toLocaleTimeString("en-US", options),
+                  "destArrivalTime": destArrivalTime.toLocaleTimeString("en-US", options),
                   "stopsInfo": route_stops
                 };
                 foundTrips.push(tripInfo);
@@ -206,20 +207,19 @@ const Navigation = () => {
           <List>
             <Typography variant="h6">Suggested routes:</Typography>
             {fastestRoutes.map((trip, index) => (
-              <ListItem key={index} className={selectedRoute === index ? 'selectedRoute' : ''}>
-                <div className="routeOption">
+              <ListItem key={index} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
+              onClick={() => handleRouteClick(index)} style={{ cursor: 'pointer' }}>
+                {/* <div className="routeOption"> */}
                 <ListItemText 
-                  primary={`Route ${trip.routeName}`}
+                  primary={trip.routeName}
                   secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
-                  onClick={() => handleRouteClick(index)}
-                  style={{ cursor: 'pointer', fontWeight: selectedRoute === index ? 'bold' : 'normal'  }}
                 />
-                <Collapse in={selectedRoute === index}>
+                <Collapse orientation="vertical" in={selectedRoute === index}>
                 <div className="routeTL">
                 <Timeline stops={trip.stopsInfo}/>
                 </div>
                 </Collapse>
-                </div>
+                {/* </div> */}
               </ListItem>
               
             ))}

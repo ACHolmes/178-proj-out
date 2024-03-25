@@ -2,11 +2,19 @@
 .routeOption {
     display: flex;
     flex-direction: column;
+    border: solid;
+    border-radius: 15px;
 }
 
-/* .routeTL {
-    
-} */
+.routeOption:hover {
+    background: #5f27ce;
+}
+
+.routeTL {
+    /* max-height: 0;
+  overflow: hidden;
+    transition: max-height 0.2s ease-out; */
+}
 
 
 .shortRouteDis {
@@ -15,11 +23,18 @@
 
 .MuiListItemText-primary {
     text-align: left;
-    /* font-weight: bold; */
+    font-weight: bold;
 }
 
 .selectedRoute {
     /* background-color: aqua; */
-    font-weight: bold;
+    /* font-weight: bold; */
+    display: flex;
+    flex-direction: column;
     border: solid;
+    border-radius: 15px;
+}
+
+.selectedRoute:hover {
+    background: #5f27ce;
 }

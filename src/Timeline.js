@@ -6,14 +6,13 @@ const Timeline = ({ stops }) => {
 return (
 <div class="container">
   <div class="wrapper">
-    <h2> Route Timeline </h2>
-    <ul class="sessions">
+    <ul class="entry">
     {stops.map((stop, index) => (
       <div className="list-contain">
       <li>
         <div key={index} className="timeline-stop">
           <div className="stop-name">{stop.name}</div>
-          <div className="stop-time">{stop.time}</div>
+          <div className="stop-time">{`ETA: ${stop.time}`}</div>
         </div>
       </li>
       </div>
