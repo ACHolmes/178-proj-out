@@ -1,3 +1,6 @@
+:root {
+    --hover-clr: #0000000e;
+  }
 
 .routeOption {
     display: flex;
@@ -7,15 +10,13 @@
 }
 
 .routeOption:hover {
-    background: #5f27ce;
+    background: var(--hover-clr);
 }
 
-.routeTL {
-    /* max-height: 0;
-  overflow: hidden;
-    transition: max-height 0.2s ease-out; */
+.routeListing {
+    display: flex;
+    flex-direction: row;
 }
-
 
 .shortRouteDis {
     text-align: left;
@@ -24,6 +25,7 @@
 .MuiListItemText-primary {
     text-align: left;
     font-weight: bold;
+    padding-left: 0px;
 }
 
 .selectedRoute {
@@ -36,5 +38,5 @@
 }
 
 .selectedRoute:hover {
-    background: #5f27ce;
+    background: var(--hover-clr);
 }

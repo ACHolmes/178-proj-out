@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, List, ListItem, ListItemText, Container, Box, Collapse, Slide } from '@mui/material';
+import { Typography, List, ListItem, ListItemText, Container, Box, Collapse, ListItemIcon } from '@mui/material';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import MapInputForm from './MapInputForm';
 import { styled } from '@mui/system';
 import jsonTimetableData from './data/timetable.json';
@@ -9,8 +10,8 @@ import routesPerStop from './data/routes_per_stop.json';
 import dataByRoute from './data/data_by_route.json';
 import LocationPinSvg from './static/location-pin.svg';
 import RouteOptions from './RouteOptions';
-import Timeline from './Timeline';
 import './Navigation.css';
+import './Timeline.css';
 
 // Styled Typography component with Product Sans font
 const StyledTypography = styled(Typography)({
@@ -182,7 +183,7 @@ const Navigation = () => {
   };
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" marginTop={4}>
+    <Box display="flex" flexDirection="column" alignItems="center" marginTop={4} >
       <StyledTypography variant="h4">
         <a href="." style={{ textDecoration: 'none', color: 'inherit' }}>
           <img src={LocationPinSvg} alt="Location Pin" style={{ marginRight: '4px', width: '30px' }} />
@@ -192,9 +193,7 @@ const Navigation = () => {
       
       <Container maxWidth="sm">
         <MapInputForm onSubmit={handleSearch} />
-        {/* {searchClicked && userInput.start && userInput.destination && (
-          <SuggestedRoutes />
-        )} */}
+
               {searchClicked && userInput.start && userInput.destination && (
       <StyledRoutes>
         {fastestRoutes.length > 0 ? (
@@ -204,23 +203,27 @@ const Navigation = () => {
               <ListItem key={index} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
               onClick={() => handleRouteClick(index)} style={{ cursor: 'pointer' }}>
                 {/* <div className="routeOption"> */}
+                <div className="routeListing">
+                <ListItemIcon>
+                  <DirectionsBusIcon />
+                </ListItemIcon>
                 <ListItemText 
                   primary={trip.routeName}
-                  secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
+                  secondary={`Leaving at: ${trip.arrivalTime}, Arrive at Dest. at: ${trip.destArrivalTime}`}
                 />
+                </div>
                 <Collapse orientation="vertical" in={selectedRoute === index}>
                 <div className="routeTL">
                 {/* <Timeline stops={trip.stopsInfo}/> */}
                 <div class="container">
                   <div class="wrapper">
-                    <h2> Route Timeline </h2>
                     <ul class="sessions">
                     {trip.stopsInfo.map((stop, index) => (
                       <div className="list-contain">
                       <li>
                         <div key={index} className="timeline-stop">
                           <div className="stop-name">{stop.name}</div>
-                          <div className="stop-time">{stop.time}</div>
+                          <div className="stop-time">{`ETA: ${stop.time}`}</div>
                         </div>
                       </li>
                       </div>

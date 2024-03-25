@@ -13,18 +13,6 @@ ul, li{
 list-style: none;
 padding: 0;
 }
-/* .list-contain */
-
-/* .container{
-display: flex;
-justify-content: center;
-align-items: center;
-padding: 0 1rem;
-padding: 3rem 0;
-
-width: var(--width);
-height: auto;
-} */
 
 
 .wrapper{
