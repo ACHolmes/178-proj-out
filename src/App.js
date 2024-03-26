@@ -11,7 +11,7 @@ function App() {
       <div className='navDis'>
       <Navigation  />
       </div>
-      <div style={{display: "flex", flexDirection:"row", width: "100%", justifyContent: "center"}}>
+      <div style={{display: "flex", flexDirection:"row", justifyContent: "center"}}>
         <DeviceFrameset device="iPhone X" width={width} height={height} zoom={0.9}>
           <MapWrapper width={width} height={height} />
         </DeviceFrameset>
