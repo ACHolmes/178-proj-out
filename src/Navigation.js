@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, List, ListItem, ListItemText, Container, Box, Collapse, ListItemIcon } from '@mui/material';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import { Button, Typography, List, ListItem, ListItemText, Container, Box } from '@mui/material';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import MapInputForm from './MapInputForm';
 import { styled } from '@mui/system';
-import jsonTimetableData from './data/timetable.json';
 import stopMappings from './data/stop_mappings.json';
 import routeMappings from './data/route_name_mappings.json';
 import routesPerStop from './data/routes_per_stop.json';
@@ -28,14 +27,32 @@ const StyledRoutes = styled(Container)(({ theme }) => ({
   },
 }));
 
+const StyledTimelineStop = styled('div')({
+  marginBottom: '8px',
+  padding: '4px',
+  borderRadius: '4px',
+  fontSize: '12px', // smaller font size for all stops
+  fontWeight: 400, // normal font weight for all stops
+  '& .stop-time': {
+    marginLeft: '8px', // add space between stop name and time
+  },
+});
+
 const Navigation = () => {
   const [fastestRoutes, setFastestRoutes] = useState([]);
-  const [liveData, setData] = useState(null);
-  const [showJson, setShowJson] = useState(false);
+  const [liveData, setLiveData] = useState(null);
   const [userInput, setUserInput] = useState({});
   const [searchClicked, setSearchClicked] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
-  const options = {hour: "numeric", minute: "numeric"};
+  const [stopExpanded, setStopExpanded] = useState([]);
+
+  const handleStopClick = (index) => {
+    setStopExpanded((prevExpanded) => {
+      const newExpanded = [...prevExpanded];
+      newExpanded[index] = !newExpanded[index]; // Toggle the expanded state of the clicked stop
+      return newExpanded;
+    });
+  };
 
   const handleRouteClick = (index) => {
     setSelectedRoute((prevIndex) => (prevIndex === index ? null : index));
@@ -44,9 +61,9 @@ const Navigation = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch('https://passio3.com/harvard/passioTransit/gtfs/realtime/vehiclePositions.json');
+      const response = await fetch('https://passio3.com/harvard/passioTransit/gtfs/realtime/tripUpdates.json');
       const result = await response.json();
-      setData(result);
+      setLiveData(result);
     };
 
     // Get initial data immediately
@@ -58,10 +75,6 @@ const Navigation = () => {
     // Clean up interval on unmount
     return () => clearInterval(interval);
   }, []);
-
-  const handleButtonClick = () => {
-    setShowJson(prevState => !prevState);
-  };
 
   const handleSearch = (data) => {
     setUserInput(data);
@@ -76,6 +89,24 @@ const Navigation = () => {
   const timeDiff = (arrival, current) => {
     return (arrival - current) / (1000 * 60 * 60);
   };
+
+  function msToTime(ms) {
+    const timestamp = ms * 1000; // Convert seconds to milliseconds
+
+    // Create a new Date object using the provided timestamp
+    const date = new Date(timestamp);
+
+    // Extract the date and time components
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth() + 1; // Months are zero-based, so we add 1
+    const day = date.getUTCDate();
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const seconds = date.getUTCSeconds();
+
+    console.log('date in ms function is', date);
+    return date;
+  }
 
   async function getNextBusArrival(route, startStop, destStop, depTime = null) {
     const foundTrips = [];
@@ -101,6 +132,7 @@ const Navigation = () => {
         
         const stop = stops[i];
         if (stop.stop_name === startStop) {
+          const startStopId = stop.stop_id;
           startInd = i;
           const arrivalTime = new Date(
             `${currentTime.toDateString()} ${stop.arrival_time}`
@@ -126,11 +158,13 @@ const Navigation = () => {
                   "route": route,
                   "routeName": routeMappings[route],
                   "tripId": tripId,
-                  "arrivalTime": arrivalTime.toLocaleTimeString("en-US", options),
-                  "destArrivalTime": destArrivalTime.toLocaleTimeString("en-US", options),
+                  "arrivalTime": arrivalTime.toLocaleTimeString(),
+                  "destArrivalTime": destArrivalTime.toLocaleTimeString(),
+                  "startStopId": startStopId,
                   "stopsInfo": route_stops
                 };
                 foundTrips.push(tripInfo);
+                console.log(tripInfo.stopsInfo);
                 break;
               }
             }
@@ -182,6 +216,43 @@ const Navigation = () => {
     }
   };
 
+  const LiveArrival = ({ tripInfo }) => {
+    // add some Promise here
+    const liveBuses = liveData["entity"];
+    let nextArrivalTime;
+    for (const busTrip of liveBuses) {
+      // console.log(typeof busTrip["trip_update"]["trip"]["trip_id"]);
+      if (busTrip["trip_update"]["trip"]["trip_id"] == tripInfo.tripId) {
+        const stopUpdates = busTrip["trip_update"]["stop_time_update"];
+        // console.log(stopUpdates);
+        for (const stopEntry of stopUpdates) {
+          if (stopEntry["stop_id"] == tripInfo.startStopId) {
+            nextArrivalTime = stopEntry["arrival"]["time"];
+            console.log('ms time is', nextArrivalTime);
+            console.log('time is', msToTime(nextArrivalTime));
+          }
+        }
+      }
+    }
+
+    return (
+      // <p>{nextArrivalTime}</p>
+      <p>Next arrival time is 3:00</p>
+    );
+  }
+
+  function getTravelTime(endTimeStr, startTimeStr) {
+    const startTime = new Date(`2000-01-01 ${startTimeStr}`);
+    const endTime = new Date(`2000-01-01 ${endTimeStr}`);
+
+    const timeDiffMs = endTime - startTime;
+
+    const timeDiffMinutes = Math.abs(timeDiffMs) / (1000 * 60);
+
+    return timeDiffMinutes;
+  }
+  
+
   return (
     <Box display="flex" flexDirection="column" alignItems="center" marginTop={4} >
       <StyledTypography variant="h4">
@@ -193,59 +264,82 @@ const Navigation = () => {
       
       <Container maxWidth="sm">
         <MapInputForm onSubmit={handleSearch} />
-
-              {searchClicked && userInput.start && userInput.destination && (
-      <StyledRoutes>
-        {fastestRoutes.length > 0 ? (
-          <List>
-            <Typography variant="h6">Suggested routes:</Typography>
-            {fastestRoutes.map((trip, index) => (
-              <ListItem key={index} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
-              onClick={() => handleRouteClick(index)} style={{ cursor: 'pointer' }}>
-                {/* <div className="routeOption"> */}
-                <div className="routeListing">
-                <ListItemIcon>
-                  <DirectionsBusIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary={trip.routeName}
-                  secondary={`Leaving at: ${trip.arrivalTime}, Arrive at Dest. at: ${trip.destArrivalTime}`}
-                />
-                </div>
-                <Collapse orientation="vertical" in={selectedRoute === index}>
-                <div className="routeTL">
-                {/* <Timeline stops={trip.stopsInfo}/> */}
-                <div class="container">
-                  <div class="wrapper">
-                    <ul class="sessions">
-                    {trip.stopsInfo.map((stop, index) => (
+        {searchClicked && userInput.start && userInput.destination && (
+        <StyledRoutes>
+          {fastestRoutes.length > 0 ? (
+            <List>
+              <Typography variant="h6">Suggested routes:</Typography>
+              {fastestRoutes.map((trip, index) => (
+                <>
+                <ListItem className={selectedRoute === index ? 'selectedRoute' : ''}>
+                  <div className="routeOption">
+                  <ListItemText 
+                    primary={`Route ${trip.routeName}`}
+                    secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
+                    onClick={() => handleRouteClick(index)}
+                    style={{ cursor: 'pointer', fontWeight: selectedRoute === index ? 'bold' : 'normal'  }}
+                  />
+              {selectedRoute === index && (
+                  <div className="routeTL">
+                    <ul className="sessions">
+                      {/* Always render the first stop */}
                       <div className="list-contain">
-                      <li>
-                        <div key={index} className="timeline-stop">
-                          <div className="stop-name">{stop.name}</div>
-                          <div className="stop-time">{`ETA: ${stop.time}`}</div>
-                        </div>
-                      </li>
+                        <li>
+                          <div className="timeline-stop">
+                            <div className="stop-name">{trip.stopsInfo[0].name}</div>
+                            <div className="stop-time">{trip.stopsInfo[0].time}</div>
+                          </div>
+                        </li>
                       </div>
-                      ))}
-                    </ul>
+
+                      {(trip.stopsInfo.length > 2) && (
+                    <li>
+                      <div className="timeline-stop ellipses" onClick={() => handleStopClick(index)}>
+                        {stopExpanded[index] ? <ExpandLess /> : <ExpandMore />}
+                        {/* Add label for total number of intermediate stops and time between arrival times */}
+                        <span className="dropdown-label">
+                          { stopExpanded[index] ? null : `${trip.stopsInfo.length - 2} stops, ${getTravelTime(trip.stopsInfo[trip.stopsInfo.length - 2].time, trip.stopsInfo[1].time)} minutes`}
+                        </span>
+                      </div>
+                      {stopExpanded[index] &&
+                        trip.stopsInfo.slice(1, -1).map((stop, i) => (
+                          <div className="list-contain" key={i}>
+                            <li>
+                              <StyledTimelineStop className={`timeline-stop ${i === 0 ? 'first' : (i === trip.stopsInfo.length - 1 ? 'last' : 'intermediate')}`}>
+                                <div className="stop-name">{stop.name}</div>
+                                <div className="stop-time">{stop.time}</div>
+                              </StyledTimelineStop>
+                            </li>
+                          </div>
+                        ))
+                      }
+                    </li>
+                  )}
+
+                  {/* Always render the last stop */}
+                  <div className="list-contain">
+                    <li>
+                      <div className="timeline-stop">
+                        <div className="stop-name">{trip.stopsInfo[trip.stopsInfo.length - 1].name}</div>
+                        <div className="stop-time">{trip.stopsInfo[trip.stopsInfo.length - 1].time}</div>
+                      </div>
+                    </li>
                   </div>
-                </div> 
-                </div>
-                </Collapse>
-                {/* </div> */}
-              </ListItem>
-              
-            ))}
-          </List>
-        ) : (
-          <Typography variant="body1">
-            No routes found. :( Try searching from a different stop!
-          </Typography>
+                </ul>
+              </div> )}
+                  </div>
+                </ListItem>
+                </>
+              ))}
+            </List>
+          ) : (
+            <Typography variant="body1">
+              No routes found. :( Try searching from a different stop!
+            </Typography>
+          )}
+          
+        </StyledRoutes>
         )}
-        
-      </StyledRoutes>
-      )}
 
       </Container>
     </Box>
