@@ -1,6 +1,5 @@
 import { GoogleMap, useLoadScript, Marker, Polyline, InfoWindow, Popup} from '@react-google-maps/api';
 import usermarker from "./static/usermarker.svg"
-import bus_stop_raw from "./static/bus_stop.svg"
 import stop_icon from "./static/bus_terminal.svg"
 import stops_dict from "./data/stops_dict.json"
 import { useState } from 'react';
@@ -99,6 +98,9 @@ const Map = (props) => {
 
   const [selectedStop, setSelectedStop] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
+
+
+  console.log(props.selectedRoute);
 
   const mapContainerStyle = {
     width: `${props.width}px`,

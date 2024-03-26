@@ -9,6 +9,8 @@ const MapWrapper = (props) => {
   const [stops, setStops]   = useState(null);
   const [userLocation, setUserLocation] = useState(null);
 
+  console.log(props);
+
   const updateLocation = () => {
     navigator.geolocation.getCurrentPosition(success, error);
   }
@@ -157,6 +159,7 @@ const MapWrapper = (props) => {
             routes={routes ? routes : []}
             userLocation={userLocation && userLocation}
             stops={stops && stops}
+            selectedRoute={props.selectedRoute}
             >
 
           </Map>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, List, ListItem, ListItemText, Container, Box } from '@mui/material';
+import { Typography, List, ListItem, ListItemText, Container, Box } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import MapInputForm from './MapInputForm';
 import { styled } from '@mui/system';
@@ -8,7 +8,6 @@ import routeMappings from './data/route_name_mappings.json';
 import routesPerStop from './data/routes_per_stop.json';
 import dataByRoute from './data/data_by_route.json';
 import LocationPinSvg from './static/location-pin.svg';
-import RouteOptions from './RouteOptions';
 import './Navigation.css';
 import './Timeline.css';
 
@@ -38,14 +37,13 @@ const StyledTimelineStop = styled('div')({
   },
 });
 
-const Navigation = () => {
+const Navigation = (props) => {
   const [fastestRoutes, setFastestRoutes] = useState([]);
   const [liveData, setLiveData] = useState(null);
   const [userInput, setUserInput] = useState({});
   const [searchClicked, setSearchClicked] = useState(false);
-  const [selectedRoute, setSelectedRoute] = useState(null);
   const [stopExpanded, setStopExpanded] = useState([]);
-
+  const [selectedRoute, setSelectedRoute] = [props.selectedRoute, props.setSelectedRoute];
   const options = {hour: "numeric", minute: "numeric"};
 
   const handleStopClick = (index) => {
@@ -56,8 +54,15 @@ const Navigation = () => {
     });
   };
 
-  const handleRouteClick = (index) => {
-    setSelectedRoute((prevIndex) => (prevIndex === index ? null : index));
+  const handleRouteClick = (trip, index) => {
+    console.log("SETTING SELECTED ROUTE");
+    // const selected = {...trip, index:index};
+    console.log(trip);
+    if (selectedRoute && selectedRoute.trip_id === trip.trip_id) {
+      return;
+    }
+    setSelectedRoute(trip);
+    // setSelectedRoute((currentSelected) => (currentSelected && currentSelected.trip_id === trip.trip_id ? null : trip));
   };
 
 
@@ -278,7 +283,7 @@ const Navigation = () => {
                   <ListItemText
                     primary={`Route ${trip.routeName}`}
                     secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
-                    onClick={() => handleRouteClick(index)}
+                    onClick={() => handleRouteClick(trip, index)}
                     style={{ cursor: 'pointer', fontWeight: selectedRoute === index ? 'bold' : 'normal'  }}
                   />
               {selectedRoute === index && (
