@@ -1,7 +1,46 @@
-import { GoogleMap, useLoadScript, Marker, Polyline, Circle, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, Marker, Polyline, InfoWindow} from '@react-google-maps/api';
 import usermarker from "./static/usermarker.svg"
+import bus_stop_raw from "./static/bus_stop.svg"
 import { useState } from 'react';
-const libraries = ['places'];
+const libraries = ['places', 'marker'];
+
+// To import an entire folder
+function importAll(r) {
+  let images = {};
+  r.keys().forEach((key) => {
+    const colorKey = key.substring(2, 8);
+    console.log(colorKey)
+    images[colorKey] = r(key);
+  })
+  return images;
+}
+
+// Trying to import all svgs for bus icons
+const busIcons = importAll(
+  require.context("./static/bus_icons", false, /\.svg$/)
+);
+
+// Map color to the appropriate bus icon
+const busicon = (color) => {
+  const colored_url = busIcons[color.substring(1)];
+  console.log(colored_url);
+  return {
+    url: colored_url,
+    scaledSize: {
+      height: 40,
+      width: 40
+    }
+  };
+}
+
+const busstop = {
+  url: bus_stop_raw,
+  scaledSize: {
+    height: 30,
+    width: 30
+  }
+}
+
 
 // Setting center of the yard as default center
 const default_map_center = {
@@ -21,7 +60,12 @@ const styles = {
       featureType: "transit",
       elementType: "labels.icon",
       stylers: [{ visibility: "off" }],
-    }
+    },
+    {
+      featureType: "road.local",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }],
+    },
   ],
 };
 
@@ -117,9 +161,10 @@ const Map = (props) => {
         {/* Draw each bus! */}
         {
           buses.map((bus) => {
-            return <Circle
+            return <Marker
               options={bus.options}
-              center={bus.position}
+              position={bus.position}
+              icon={busicon(bus.options.strokeColor)}
               radius={bus.radius}
             />
           })
@@ -140,6 +185,7 @@ const Map = (props) => {
               position={stop.position}
               title={stop.stop_name}
               clickable={true}
+              icon={busstop}
               onClick={() => setSelectedStop(stop)}
             />
           })
@@ -151,7 +197,11 @@ const Map = (props) => {
             position={selectedStop.position}
             onCloseClick={() => setSelectedStop(null)}
           >
-            <div>{selectedStop.stop_name}</div>
+            <div>
+              <div>{selectedStop.stop_name}</div>
+              <p> Example text </p>
+            </div>
+
           </InfoWindow>
         )}
       </GoogleMap>
