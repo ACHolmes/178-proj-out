@@ -160,8 +160,8 @@ const Map = (props) => {
 
         {/* Draw each bus! */}
         {
-          return <Marker
           buses.map((bus, idx) => {
+            return <Marker
               key={idx}
               options={bus.options}
               position={bus.position}

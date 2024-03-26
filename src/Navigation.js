@@ -46,6 +46,8 @@ const Navigation = () => {
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [stopExpanded, setStopExpanded] = useState([]);
 
+  const options = {hour: "numeric", minute: "numeric"};
+
   const handleStopClick = (index) => {
     setStopExpanded((prevExpanded) => {
       const newExpanded = [...prevExpanded];
@@ -129,7 +131,7 @@ const Navigation = () => {
         let startInd;
         let endInd;
         let route_stops = [];
-        
+
         const stop = stops[i];
         if (stop.stop_name === startStop) {
           const startStopId = stop.stop_id;
@@ -149,7 +151,7 @@ const Navigation = () => {
                   const route_stopTime = route_stop.arrival_time
                   const newRoute_stopTime = new Date( `${currentTime.toDateString()} ${route_stopTime}`);
                   obj = { "name": route_stopName, "time": newRoute_stopTime.toLocaleTimeString("en-US", options)};
-                  route_stops.push(obj); 
+                  route_stops.push(obj);
                 }
                 const destArrivalTime = new Date(
                   `${departureTime.toDateString()} ${next_stop.arrival_time}`
@@ -251,7 +253,7 @@ const Navigation = () => {
 
     return timeDiffMinutes;
   }
-  
+
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" marginTop={4} >
@@ -261,7 +263,7 @@ const Navigation = () => {
           PassioBetter
         </a>
       </StyledTypography>
-      
+
       <Container maxWidth="sm">
         <MapInputForm onSubmit={handleSearch} />
         {searchClicked && userInput.start && userInput.destination && (
@@ -273,7 +275,7 @@ const Navigation = () => {
                 <>
                 <ListItem className={selectedRoute === index ? 'selectedRoute' : ''}>
                   <div className="routeOption">
-                  <ListItemText 
+                  <ListItemText
                     primary={`Route ${trip.routeName}`}
                     secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
                     onClick={() => handleRouteClick(index)}
@@ -337,7 +339,7 @@ const Navigation = () => {
               No routes found. :( Try searching from a different stop!
             </Typography>
           )}
-          
+
         </StyledRoutes>
         )}
 
