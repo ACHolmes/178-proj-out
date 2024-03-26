@@ -1,6 +1,7 @@
 import { GoogleMap, useLoadScript, Marker, Polyline, InfoWindow, Popup} from '@react-google-maps/api';
 import usermarker from "./static/usermarker.svg"
 import bus_stop_raw from "./static/bus_stop.svg"
+import stop_icon from "./static/bus_terminal.svg"
 import stops_dict from "./data/stops_dict.json"
 import { useState } from 'react';
 const libraries = ['places', 'marker'];
@@ -33,16 +34,20 @@ const busicon = (color) => {
     },
     anchor: {
       x: 20,
-      y: 20
+      y: 10
     }
   };
 }
 
 const busstop = {
-  url: bus_stop_raw,
+  url: stop_icon,
   scaledSize: {
     height: 30,
     width: 30
+  },
+  anchor: {
+    x: 15,
+    y: 10
   }
 }
 
