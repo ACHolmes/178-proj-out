@@ -1,6 +1,7 @@
-import { GoogleMap, useLoadScript, Marker, Polyline, InfoWindow} from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, Marker, Polyline, InfoWindow, Popup} from '@react-google-maps/api';
 import usermarker from "./static/usermarker.svg"
 import bus_stop_raw from "./static/bus_stop.svg"
+import stops_dict from "./data/stops_dict.json"
 import { useState } from 'react';
 const libraries = ['places', 'marker'];
 
@@ -22,13 +23,17 @@ const busIcons = importAll(
 
 // Map color to the appropriate bus icon
 const busicon = (color) => {
-  const colored_url = busIcons[color.substring(1)];
+  const colored_url = busIcons[color];
   console.log(colored_url);
   return {
     url: colored_url,
     scaledSize: {
       height: 40,
       width: 40
+    },
+    anchor: {
+      x: 20,
+      y: 20
     }
   };
 }
@@ -86,14 +91,22 @@ const mapOptions = {
 const Map = (props) => {
 
   const [selectedStop, setSelectedStop] = useState(null);
+  const [selectedBus, setSelectedBus] = useState(null);
 
   const mapContainerStyle = {
     width: `${props.width}px`,
     height: `${props.height}px`,
   };
 
+  console.log(props.buses);
+
   const buses = props.buses.map((bus) => {
     return {
+      "vehicle_id": bus.vehicle.vehicle.id,
+      "occupancy": bus.vehicle.occupancy_status,
+      "next_stop": stops_dict[bus.vehicle.stop_id].stop_name,
+      "route_long_name": bus.vehicle.route_data.route_long_name,
+      "route_short_name": bus.vehicle.route_data.route_short_name,
       "position": {
         "lat": bus.vehicle.position["latitude"],
         "lng": bus.vehicle.position["longitude"]
@@ -105,9 +118,15 @@ const Map = (props) => {
         strokeWeight: 3,
         fillColor: `#${bus.vehicle.route_data.route_color}`,
         fillOpacity: 0.65
+      },
+      "icon": busicon(bus.vehicle.route_data.route_color),
+      "anchorPoint": {
+        x: 0,
+        y: -100
       }
     }
   });
+  console.log(buses);
 
   const routes = props.routes.map((route) => {
     return {
@@ -126,6 +145,14 @@ const Map = (props) => {
     }
 
   })
+
+  const updateSelectedBus = (bus) => {
+    if (bus && selectedBus && bus.vehicle_id === selectedBus.vehicle_id) {
+      if (bus.position.lat !== selectedBus.position.lat || bus.position.lng !== selectedBus.position.lng) {
+        setSelectedBus(bus);
+      }
+    }
+  }
 
   const { isLoaded: isMapLoaded, loadError: loadMapError } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -165,8 +192,10 @@ const Map = (props) => {
               key={idx}
               options={bus.options}
               position={bus.position}
-              icon={busicon(bus.options.strokeColor)}
+              icon={bus.icon}
               radius={bus.radius}
+              onClick={() => setSelectedBus(bus)}
+              onPositionChanged={() => updateSelectedBus(bus)}
             />
           })
         }
@@ -188,11 +217,25 @@ const Map = (props) => {
               title={stop.stop_name}
               clickable={true}
               icon={busstop}
-              onClick={() => setSelectedStop(stop)}
+              onClick={(stop) => setSelectedStop(stop)}
             />
           })
           )
         }
+
+        {selectedBus && (
+          <InfoWindow
+            position={selectedBus.position}
+            onCloseClick={() => setSelectedBus(null)}
+            anchor={selectedBus}
+          >
+            <div>
+              <h4 style={{marginTop: 0 + 'px', marginBottom: 0 + 'px'}}><u>{selectedBus.route_long_name}</u></h4>
+              <div>Next stop: {selectedBus.next_stop}</div>
+            </div>
+
+          </InfoWindow>
+        )}
 
         {selectedStop && (
           <InfoWindow

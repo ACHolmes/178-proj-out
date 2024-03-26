@@ -1,90 +1,66 @@
-@font-face { 
-  font-family: 'Roboto'; 
-  src: url('https://fonts.googleapis.com/css2?family=Roboto&display=swap'); 
-} 
-
+/*const [width, height] = [375, 812];*/
 :root {
   --width: 375px;
   --height: 812px;
-  --fixed-height: 270px; 
+  --fixed-height: 270px;
 }
 
-.dropdown-label {
-  color: #2a2839;
-  font-family: Verdana;
-  font-weight: normal;
-  font-size: .9rem;
-  margin-bottom: .3rem;
-}
-
-.dropdown-label {
-  font-weight: normal;
-}
-
-.list-contain {
-  padding-bottom: 0rem;
-  margin-left: 0; 
-}
-
-.list-contain:before {
-  width: 10px;
-  height: 10px;
-  left: -20px; 
-}
-
-.list-contain:last-child {
-  border-left: none;
-  padding-bottom: 0;
-}
 
 ul, li{
 list-style: none;
 padding: 0;
 }
+/* .list-contain */
 
+.container{
+display: flex;
+justify-content: center;
+align-items: center;
+padding: 0 1rem;
+padding: 3rem 0;
+
+width: var(--width);
+height: var(--fixed-height);
+}
 
 .wrapper{
-background: #fffdfd00;
-padding: 1rem;
-padding-top: 0.1rem;
+background: #fffdfd;
+padding: 2rem;
 border-radius: 15px;
 /* border: solid; */
 /* border-color: #828282; */
 border-width: 1.5px;
-/* box-shadow: 3px 3px 5px #bfbfbf; */
+box-shadow: 3px 3px 5px #bfbfbf;
 width: var(--width);
 position: relative;
+overflow: scroll;
 bottom: 0px;
-top: 0px;
-/* height: auto; */
-/* transition: height 1s; */
+height: var(--fixed-height);
 }
 
 h2{
-font-size: 1rem;
+font-size: 1.1rem;
 font-family: sans-serif;
 }
 
 .sessions{
-margin-top: .8rem;
-border-radius: 8px;
+margin-top: 2rem;
+border-radius: 12px;
 position: relative;
 }
 
 .list-contain{
-padding-bottom: 0.3rem;
+padding-bottom: 1.5rem;
 border-left: 3px solid #abaaed;
 position: relative;
 padding-left: 20px;
 margin-left: 10px;
-font-family: "Roboto";
+font-family: Verdana;
 
 &:last-child{
   border: 0px;
   padding-bottom: 0;
-  /* box-shadow: 3px 3px 0px #bab5f8; */
   left: 2px;
-  font-weight: bold;
 }
 &:before{
   content: '';
@@ -98,20 +74,19 @@ font-family: "Roboto";
   left: -10px;
   top: 0px;
 }
-&:first-child{
-  /* border: 0px;
-  padding-bottom: 0;
-   box-shadow: 3px 3px 0px #bab5f8; 
-  left: 2px; */
-  font-weight: bold;
 }
-
+.stop-name{
+color: #2a2839;
+font-family: Verdana;
+font-weight: 700;
+font-size: .9rem;
+margin-bottom: .3rem;
 }
 
 .stop-time{
 color: #4f4f4f;
-font-family: "Roboto", sans-serif;
-line-height: .1;
+font-family: Verdana;
+line-height: 1.5;
 padding-top: 0px;
 margin-top: 0.0rem;
 font-size: .85rem;
