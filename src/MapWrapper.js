@@ -79,27 +79,45 @@ const MapWrapper = (props) => {
 
 
       // Getting all stops that these routes hit
-      const new_route_stops = [...new Set(liveBusData.map((liveBus) => {
+      const new_route_stops = {};
+
+      // console.log(route_data);
+
+      liveBusData.forEach((liveBus) => {
         for (const route_info of route_data) {
           for (const trip_info of Object.values(route_info.trips)) {
-            // TODO: Check whether this can be ===
+            // If we found route that matches trip of this live bus, need to update stops
             if (trip_info.trip_id == liveBus.vehicle.trip.trip_id) {
-              return trip_info.stops.map((stop) => {
-                return {
-                  stop_id: stop.stop_id,
-                  stop_code: stop.stop_code,
-                  stop_name: stop.stop_name,
-                  position: {
-                    lat: stop.stop_lat,
-                    lng: stop.stop_lon
+              // For each stop on this trip
+              trip_info.stops.forEach((stop) => {
+                // If we already have the stop, just need to update the routes for this stop
+                if (stop.stop_id in new_route_stops) {
+                  new_route_stops[stop.stop_id].routes[route_info.route_id] = route_info;
+                } else {
+                  // Else we need to create a new stop and add in all the info
+                  new_route_stops[stop.stop_id] = {
+                    stop_id: stop.stop_id,
+                    stop_code: stop.stop_code,
+                    stop_name: stop.stop_name,
+                    position: {
+                      lat: stop.stop_lat,
+                      lng: stop.stop_lon
+                    },
+                    // Starting with the routes just including this first route we found
+                    routes: {
+                      [route_info.route_id]: route_info
+                    }
                   }
                 }
+
               })
             }
           }
         }
-        return {};
-      }).flat())];
+      });
+
+      // console.log("NEW ROUTE STOPS");
+      // console.log(new_route_stops);
 
       // Then setting the live bus data
       setRoutes(new_routes);

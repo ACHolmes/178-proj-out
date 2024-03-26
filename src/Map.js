@@ -10,7 +10,7 @@ function importAll(r) {
   let images = {};
   r.keys().forEach((key) => {
     const colorKey = key.substring(2, 8);
-    console.log(colorKey)
+    // console.log(colorKey)
     images[colorKey] = r(key);
   })
   return images;
@@ -24,7 +24,7 @@ const busIcons = importAll(
 // Map color to the appropriate bus icon
 const busicon = (color) => {
   const colored_url = busIcons[color];
-  console.log(colored_url);
+  // console.log(colored_url);
   return {
     url: colored_url,
     scaledSize: {
@@ -89,6 +89,8 @@ const mapOptions = {
 };
 
 const Map = (props) => {
+  // console.log("PROPS");
+  // console.log(props.stops);
 
   const [selectedStop, setSelectedStop] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
@@ -98,7 +100,7 @@ const Map = (props) => {
     height: `${props.height}px`,
   };
 
-  console.log(props.buses);
+  // console.log(props.buses);
 
   const buses = props.buses.map((bus) => {
     return {
@@ -126,7 +128,7 @@ const Map = (props) => {
       }
     }
   });
-  console.log(buses);
+  // console.log(buses);
 
   const routes = props.routes.map((route) => {
     return {
@@ -210,14 +212,14 @@ const Map = (props) => {
 
         {
           props.stops &&  (
-            props.stops.map((stop, idx) => {
+            Object.values(props.stops).map((stop, idx) => {
             return <Marker
               key={idx}
               position={stop.position}
               title={stop.stop_name}
               clickable={true}
               icon={busstop}
-              onClick={(stop) => setSelectedStop(stop)}
+              onClick={() => setSelectedStop(stop)}
             />
           })
           )
@@ -240,11 +242,21 @@ const Map = (props) => {
         {selectedStop && (
           <InfoWindow
             position={selectedStop.position}
-            onCloseClick={() => setSelectedStop(null)}
+            onCloseClick={() => {console.log('here'); console.log(selectedStop); setSelectedStop(null)}}
           >
+
             <div>
-              <div>{selectedStop.stop_name}</div>
-              <p> Example text </p>
+              <h3 style={{marginTop: 0 + 'px', marginBottom: 0 + 'px', fontSize: 20 + 'px'}}>{selectedStop.stop_name}</h3>
+              <u style={{marginBottom: 40 + 'px'}}>Active Routes:</u>
+              <div style={{display: "flex", flexDirection: "column", width: 100 + '%'}}>
+                {
+                  Object.values(selectedStop.routes).map((route) => {
+                    return <div style={{ backgroundColor: '#' + route.route_color, color: "#FFF", fontWeight: "900", fontSize: 16 + 'px', textAlign: "center", padding: "4px 4px 4px 4px"}}>
+                      {route.route_long_name}
+                      </div>
+                  })
+                }
+              </div>
             </div>
 
           </InfoWindow>
