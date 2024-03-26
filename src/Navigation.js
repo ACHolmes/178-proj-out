@@ -9,6 +9,7 @@ import routesPerStop from './data/routes_per_stop.json';
 import dataByRoute from './data/data_by_route.json';
 import LocationPinSvg from './static/location-pin.svg';
 import RouteOptions from './RouteOptions';
+import tripToRouteMapping from './data/trip_to_route_mapping.json'
 import './Navigation.css';
 import './Timeline.css';
 
@@ -129,8 +130,6 @@ const Navigation = () => {
       
       // check whether bus is running on this day
       const currentDay = currentTime.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
-      console.log(currentDay)
-      console.log(trip.days);
       if (!(trip.days.includes(currentDay))) {
         continue;
       }
@@ -207,7 +206,7 @@ const Navigation = () => {
       const arrivalTimeB = new Date(`2000-01-01 ${b.arrivalTime}`);
       return arrivalTimeA - arrivalTimeB;
     });
-    setFastestRoutes(allTrips.slice(0, 3));
+    setFastestRoutes(allTrips.slice(0, 1));
   }
 
   const calculateRoutes = () => {
@@ -229,14 +228,39 @@ const Navigation = () => {
   };
 
   const LiveArrival = ({ tripInfo }) => {
-    // add some Promise here
+    console.log('checking route', tripInfo.routeName, 'with trip id', tripInfo.tripId);
+
+    // TODO: add some await Promise logic here when grabbing live data
     const liveBuses = liveData["entity"];
     let nextArrivalTime;
+    let liveTrips = [];
     for (const busTrip of liveBuses) {
-      // console.log(typeof busTrip["trip_update"]["trip"]["trip_id"]);
-      if (busTrip["trip_update"]["trip"]["trip_id"] == tripInfo.tripId) {
+      liveTrips.push(busTrip["trip_update"]["trip"]["trip_id"]);
+    }
+    console.log(liveTrips);
+
+    if (liveTrips.includes(tripInfo.tripId)) {
+      console.log('YES, trip id', tripInfo.tripId, 'is currently running');
+    }
+
+    const timetableRouteId = tripInfo.routeId;
+
+    // iterate through all live trips
+    for (const busTrip of liveBuses) {
+      const busTripId = busTrip["trip_update"]["trip"]["trip_id"];
+      const liveBusRouteId = tripToRouteMapping[busTripId]; // get route ID
+      console.log('live bus is on route', liveBusRouteId);
+      if (liveBusRouteId == timetableRouteId) {
+        console.log('these trips are part of the same route', liveBusRouteId);
+      }
+
+      // if it matches the timetable search result, find ETAs and append to tripInfo
+      if (busTripId == tripInfo.tripId) {
+        console.log('we have a matching trip!')
         const stopUpdates = busTrip["trip_update"]["stop_time_update"];
-        // console.log(stopUpdates);
+        tripInfo["liveData"] = stopUpdates;
+        console.log(stopUpdates);
+
         for (const stopEntry of stopUpdates) {
           if (stopEntry["stop_id"] == tripInfo.startStopId) {
             nextArrivalTime = stopEntry["arrival"]["time"];
@@ -247,9 +271,18 @@ const Navigation = () => {
       }
     }
 
+    //  tripInfo
+    // "route": route,
+    // "routeName": routeMappings[route],
+    // "tripId": tripId,
+    // "arrivalTime": arrivalTime.toLocaleTimeString(),
+    // "destArrivalTime": destArrivalTime.toLocaleTimeString(),
+    // "startStopId": startStopId,
+    // "stopsInfo": route_stops
+
     return (
       // <p>{nextArrivalTime}</p>
-      <p>Next arrival time is 3:00</p>
+      <p>Next bus on route {tripInfo.routeName} is </p>
     );
   }
 
@@ -279,10 +312,12 @@ const Navigation = () => {
         {searchClicked && userInput.start && userInput.destination && (
         <StyledRoutes>
           {fastestRoutes.length > 0 ? (
+            <>
             <List>
               <Typography variant="h6">Suggested routes:</Typography>
               {fastestRoutes.map((trip, index) => (
                 <>
+                <LiveArrival tripInfo={trip} />
                 <ListItem className={selectedRoute === index ? 'selectedRoute' : ''}>
                   <div className="routeOption">
                   <ListItemText
@@ -344,6 +379,7 @@ const Navigation = () => {
                 </>
               ))}
             </List>
+            </>
           ) : (
             <Typography variant="body1">
               No routes found. :( Try searching from a different stop!
