@@ -126,6 +126,17 @@ const Navigation = () => {
     for (const tripId in routeData.trips) {
       const trip = routeData.trips[tripId];
       const stops = trip.stops;
+      
+      // check whether bus is running on this day
+      const currentDay = currentTime.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
+      console.log(currentDay)
+      console.log(trip.days);
+      if (!(trip.days.includes(currentDay))) {
+        continue;
+      }
+
+      // TODO: check if bus is not currently running
+      //
 
       for (let i = 0; i < stops.length; i++) {
         let startInd;
@@ -166,7 +177,6 @@ const Navigation = () => {
                   "stopsInfo": route_stops
                 };
                 foundTrips.push(tripInfo);
-                console.log(tripInfo.stopsInfo);
                 break;
               }
             }
