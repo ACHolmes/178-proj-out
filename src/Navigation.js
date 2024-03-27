@@ -327,7 +327,7 @@ const Navigation = () => {
                             <p>Leaving at: {trip.arrivalTime}</p>
                             <LiveArrival tripInfo={trip} />
                             <p>Arriving at destination at: {trip.destArrivalTime}</p>
-                            {trip.nextTrips.length > 0 ? <p>Next arrival is scheduled for trip.nextTrips[0].arrivalTime</p> : <></>}
+                            {trip.nextTrips.length > 0 ? <p>Next arrival is scheduled for {trip.nextTrips[0].arrivalTime}</p> : <></>}
                         </div>
                     }
                     onClick={() => handleRouteClick(index)}
