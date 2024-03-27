@@ -123,9 +123,7 @@ function MapInputForm({ onSubmit, onReset}) {
                     )}
                     <Grid item xs={12}>
                         <Button variant="contained" color="primary" onClick={handleSubmit}>Search</Button>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Button variant="contained" color="warning" onClick={handleReset}>Reset</Button>
+                        <Button variant="contained" color="warning" onClick={handleReset} style={{marginLeft: "1rem"}}>Reset</Button>
                     </Grid>
                 </Grid>
             </form>
