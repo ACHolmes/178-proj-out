@@ -15,7 +15,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     width: '100%',
 }));
 
-function MapInputForm({ onSubmit }) {
+function MapInputForm({ onSubmit, onReset}) {
     const [start, setStart] = useState('Quad');
     const [destination, setDestination] = useState('SEC');
     const [departureTime, setDepartureTime] = useState('');
@@ -59,6 +59,10 @@ function MapInputForm({ onSubmit }) {
         }
     };
 
+    const handleReset = () => {
+        onReset();
+    }
+
     const stopOptions = [
         "1 Western Ave", "784 Memorial Drive", "Barry's Corner (Northbound)", "Barry's Corner (Southbound)",
         "Cambridge Common", "Harvard Square (Northbound)", "Harvard Square (Southbound)", "Kennedy School (Northbound)",
@@ -81,7 +85,7 @@ function MapInputForm({ onSubmit }) {
     return (
         <div>
             <Typography variant="h6">Navigation</Typography>
-            <form onSubmit={handleSubmit}>
+            <form>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                         <StyledFormControl>
@@ -118,7 +122,10 @@ function MapInputForm({ onSubmit }) {
                         </Grid>
                     )}
                     <Grid item xs={12}>
-                        <Button type="submit" variant="contained" color="primary">Search</Button>
+                        <Button variant="contained" color="primary" onClick={handleSubmit}>Search</Button>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Button variant="contained" color="warning" onClick={handleReset}>Reset</Button>
                     </Grid>
                 </Grid>
             </form>

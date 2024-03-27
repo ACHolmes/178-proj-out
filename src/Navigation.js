@@ -86,6 +86,13 @@ const Navigation = (props) => {
     setSearchClicked(true); // Set searchClicked to true when search button is clicked
   };
 
+  const handleReset = () => {
+    // setUserInput(null);
+    // setSearchClicked(false);
+    setFastestRoutes(null);
+    console.log('reset fastest routes');
+  };
+
   // Anytime setUserInput completes, calculate new routes
   useEffect(() => {
     calculateRoutes();
@@ -268,8 +275,8 @@ const Navigation = (props) => {
       </StyledTypography>
 
       <Container maxWidth="sm">
-        <MapInputForm onSubmit={handleSearch} />
-        {searchClicked && userInput.start && userInput.destination && (
+        <MapInputForm onSubmit={handleSearch} onReset={handleReset} />
+        {fastestRoutes && userInput.start && userInput.destination && (
         <StyledRoutes>
           {fastestRoutes.length > 0 ? (
             <List>

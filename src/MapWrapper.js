@@ -40,7 +40,7 @@ const MapWrapper = (props) => {
       if (selectedRoute) {
         // If we have a selected route, update data to display only that route
         gatherRouteMapData(liveBuses, selectedRoute, fastestRoutes, setRoutes, setStops, setBuses);
-      } else if (fastestRoutes.length > 0) {
+      } else if (fastestRoutes && fastestRoutes.length > 0) {
         // Otherwise, if we have searched but not yet made a selection, show all the options
         gatherResultsMapData(liveBuses, fastestRoutes, setRoutes, setStops, setBuses);
       } else {
