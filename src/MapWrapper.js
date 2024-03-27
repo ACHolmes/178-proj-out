@@ -29,6 +29,8 @@ const MapWrapper = (props) => {
 
   // Updates the map data if the buses, or the selectedRoute gets updated
   useEffect(() => {
+    console.log("updating map data");
+    console.log(props);
     if (liveBusData) {
       updateMapData(liveBusData, props.selectedRoute, props.fastestRoutes);
     }

@@ -18,14 +18,20 @@ const gatherRouteMapData = (liveBusData, selectedRoute, fastestRoutes, setRoutes
   const now = new Date();
 
   // Getting time into military time
-  let [hrs, mins, secs_midi] = selectedRoute.arrivalTime.split(":");
-  let [secs, midi] = secs_midi.split(" ");
+  console.log("TIME CHECK");
+  console.log(selectedRoute.arrivalTime);
+
+  let [hrs, mins_midi] = selectedRoute.arrivalTime.split(":");
+  let [mins, midi] = mins_midi.split(" ");
   hrs = parseInt(hrs);
   console.log(midi);
-  if (midi === "PM") {
+  if (midi === "PM" && hrs != 12) {
     hrs += 12;
   }
-  const military_time = [hrs, mins, secs];
+  const military_time = [hrs, mins, 0];
+
+  console.log("MILITARY TIME");
+  console.log(military_time);
   // Set the arrival date object
   const arrivalDate = new Date().setHours(...military_time);
 

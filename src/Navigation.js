@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, List, ListItem, ListItemText, Container, Box } from '@mui/material';
+import { Button, Typography, List, ListItem, ListItemText, Container, Box, ListItemIcon, Collapse } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { Tooltip } from 'react-tooltip'
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import MapInputForm from './MapInputForm';
 import { styled } from '@mui/system';
 import stopMappings from './data/stop_mappings.json';
@@ -8,6 +10,8 @@ import routeMappings from './data/route_name_mappings.json';
 import routesPerStop from './data/routes_per_stop.json';
 import dataByRoute from './data/data_by_route.json';
 import LocationPinSvg from './static/location-pin.svg';
+import RouteOptions from './RouteOptions';
+import tripToRouteMapping from './data/trip_to_route_mapping.json'
 import './Navigation.css';
 import './Timeline.css';
 
@@ -60,6 +64,8 @@ const Navigation = (props) => {
       return;
     }
     // Else update state with new selected route to show
+    console.log("Selected trip update");
+    console.log(trip);
     setSelectedRoute(trip);
   };
 
@@ -117,12 +123,25 @@ const Navigation = (props) => {
     const minutes = date.getUTCMinutes();
     const seconds = date.getUTCSeconds();
 
-    console.log('date in ms function is', date);
     return date;
+  }
+
+  function getTravelTime(endTime, startTime) {
+    // const startTime = new Date(`2000-01-01 ${startTimeStr}`);
+    // const endTime = new Date(`2000-01-01 ${endTimeStr}`);
+
+    const timeDiffMs = endTime - startTime;
+
+    const timeDiffMinutes = Math.abs(timeDiffMs) / (1000 * 60);
+
+    return timeDiffMinutes;
   }
 
   async function getNextBusArrival(route, startStop, destStop, depTime = null) {
     const foundTrips = [];
+    let seenRoutes = new Set();
+    console.log('fetching bus');
+    // let alreadyFound = false;
 
     const routeData = dataByRoute[route.toString()];
     if (!routeData) {
@@ -137,6 +156,15 @@ const Navigation = (props) => {
     for (const tripId in routeData.trips) {
       const trip = routeData.trips[tripId];
       const stops = trip.stops;
+
+      // check whether bus is running on this day
+      const currentDay = currentTime.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
+      if (!(trip.days.includes(currentDay))) {
+        continue;
+      }
+
+      // TODO: check if bus is not currently running
+      //
 
       for (let i = 0; i < stops.length; i++) {
         let startInd;
@@ -167,17 +195,29 @@ const Navigation = (props) => {
                 const destArrivalTime = new Date(
                   `${departureTime.toDateString()} ${next_stop.arrival_time}`
                 );
+                const travelTime = getTravelTime(destArrivalTime, arrivalTime);
                 const tripInfo = {
                   "route": route,
                   "routeName": routeMappings[route],
                   "tripId": tripId,
-                  "arrivalTime": arrivalTime.toLocaleTimeString(),
-                  "destArrivalTime": destArrivalTime.toLocaleTimeString(),
+                  "arrivalTime": arrivalTime.toLocaleTimeString("en-US", options),
+                  "destArrivalTime": destArrivalTime.toLocaleTimeString("en-US", options),
                   "startStopId": startStopId,
-                  "stopsInfo": route_stops
+                  "stopsInfo": route_stops,
+                  "nextTrips": [],
+                  "travelTime": travelTime,
                 };
-                foundTrips.push(tripInfo);
-                console.log(tripInfo.stopsInfo);
+                if (seenRoutes.has(route)) {
+                  for (let i = 0; i < foundTrips.length; i++) {
+                    if (foundTrips[i]["route"] == route) {
+                      foundTrips[i]["nextTrips"].push(tripInfo);
+                    }
+                  }
+                } else {
+                  foundTrips.push(tripInfo);
+                  seenRoutes.add(route);
+                }
+
                 break;
               }
             }
@@ -194,7 +234,6 @@ const Navigation = (props) => {
 
     return foundTrips;
   }
-
   async function fetchBusArrival(routes, startStop, destStop, departureTime = null) {
     const allTrips = [];
     for (const route of routes) {
@@ -208,7 +247,10 @@ const Navigation = (props) => {
       const arrivalTimeB = new Date(`2000-01-01 ${b.arrivalTime}`);
       return arrivalTimeA - arrivalTimeB;
     });
-    setFastestRoutes(allTrips.slice(0, 3));
+
+    // console.log('all trips are', allTrips);
+    console.log('ALLTRIPS', allTrips);
+    setFastestRoutes(allTrips);
   }
 
   const calculateRoutes = () => {
@@ -229,42 +271,83 @@ const Navigation = (props) => {
     }
   };
 
-  const LiveArrival = ({ tripInfo }) => {
-    // add some Promise here
+  const LiveArrival = ({ tripInfo, scheduled }) => {
+    console.log('checking route', tripInfo.routeName, 'with trip id', tripInfo.tripId);
+
+    // TODO: add some await Promise logic here when grabbing live data
     const liveBuses = liveData["entity"];
-    let nextArrivalTime;
+    let nextArrivalTime = null;
+    let liveTrips = [];
     for (const busTrip of liveBuses) {
-      // console.log(typeof busTrip["trip_update"]["trip"]["trip_id"]);
-      if (busTrip["trip_update"]["trip"]["trip_id"] == tripInfo.tripId) {
+      liveTrips.push(busTrip["trip_update"]["trip"]["trip_id"]);
+    }
+    console.log(liveTrips);
+
+    // iterate through all live trips
+    for (const busTrip of liveBuses) {
+      const busTripId = busTrip["trip_update"]["trip"]["trip_id"];
+      // console.log('trip to route mapping is', tripToRouteMapping[busTripId]);
+      // console.log(tripInfo.route);
+      if (tripToRouteMapping[busTripId] == tripInfo.route) {
+      // if it matches the timetable search result, find ETAs and append to tripInfo
+      // if (busTripId == tripInfo.tripId) {
+        console.log('we have a matching trip!')
         const stopUpdates = busTrip["trip_update"]["stop_time_update"];
-        // console.log(stopUpdates);
+        tripInfo["liveData"] = stopUpdates;
+        console.log(stopUpdates);
+
+        // augment the stop_times in the tripInfo dict
         for (const stopEntry of stopUpdates) {
           if (stopEntry["stop_id"] == tripInfo.startStopId) {
-            nextArrivalTime = stopEntry["arrival"]["time"];
-            console.log('ms time is', nextArrivalTime);
-            console.log('time is', msToTime(nextArrivalTime));
+            nextArrivalTime = msToTime(stopEntry["arrival"]["time"]).toLocaleTimeString("en-US", options)
+            console.log('next arrival to ', stopEntry["stop_id"], 'time is', nextArrivalTime);
+            console.log('tripID', busTripId);
           }
         }
       }
     }
 
-    return (
-      // <p>{nextArrivalTime}</p>
-      <p>Next arrival time is 3:00</p>
-    );
+
+    if (nextArrivalTime != null) {
+      // return (
+      // <div>
+      //   <p className={`live-eta-${nextArrivalTime < scheduled ? 'green' : 'red'}`}>
+      // Live ETA: {nextArrivalTime}</p>
+      // </div> )
+      return (
+        <div>
+
+          <a
+            data-tooltip-id="my-tooltip"
+            data-tooltip-content="This gives a more accurate ETA based on bus location."
+            data-tooltip-place="top"
+          >
+            <p
+        className={`live-eta-${nextArrivalTime < scheduled ? 'green' : 'red'}`}>
+        Live ETA: {nextArrivalTime}
+      </p>
+          </a>
+      <Tooltip id="my-tooltip" />
+    </div>)
+
+    } else {
+      return <></>
+    }
   }
 
-  function getTravelTime(endTimeStr, startTimeStr) {
-    const startTime = new Date(`2000-01-01 ${startTimeStr}`);
-    const endTime = new Date(`2000-01-01 ${endTimeStr}`);
-
-    const timeDiffMs = endTime - startTime;
-
-    const timeDiffMinutes = Math.abs(timeDiffMs) / (1000 * 60);
-
-    return timeDiffMinutes;
+  const TravelTime = ({ tripInfo }) => {
+    const routeTravelTime = tripInfo.travelTime;
+    const routeTT = routeTravelTime.toString();
+    if (routeTravelTime != null) {
+      return (
+        <div className="travel-time-chunk">
+          <p className="tt-text">Travel</p>
+          <p className="tt-num">{routeTT}</p>
+          <p className="tt-mins">min(s)</p>
+        </div>
+        )
+    }
   }
-
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" marginTop={4} >
@@ -280,75 +363,73 @@ const Navigation = (props) => {
         {fastestRoutes && userInput.start && userInput.destination && (
         <StyledRoutes>
           {fastestRoutes.length > 0 ? (
+            <>
             <List>
               <Typography variant="h6">Suggested routes:</Typography>
               {fastestRoutes.map((trip, index) => (
-                <>
-                <ListItem className={selectedRoute === index ? 'selectedRoute' : ''}>
-                  <div className="routeOption">
-                  <ListItemText
-                    primary={`Route ${trip.routeName}`}
-                    secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
-                    onClick={() => handleRouteClick(trip, index)}
-                    style={{ cursor: 'pointer', fontWeight: selectedRoute === index ? 'bold' : 'normal'  }}
-                  />
-              {selectedRoute === index && (
-                  <div className="routeTL">
-                    <ul className="sessions">
-                      {/* Always render the first stop */}
+                 <>
+
+                <ListItem alignItems="flex-start" disableGutters key={index} className={'routeOption'}
+              onClick={() => handleRouteClick(trip,index)} style={{ cursor: 'pointer' }}>
+                <div className="route-short">
+
+                <div className="routeListing">
+                <ListItemIcon>
+                  <DirectionsBusIcon className={'testIcon'}/>
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <div className="route-title">
+                      <p className="route-name">{trip.routeName}</p>
+                      {!(userInput.departureTime) ? <LiveArrival tripInfo={trip} scheduled={trip.arrivalTime} /> : <></> }
+                    </div>
+                  }
+                  secondary={
+                    <div>
+                      <p className="time-range">{trip.arrivalTime} - {trip.destArrivalTime}</p>
+                      {trip.nextTrips.length > 0 ? <p className="next-arrival">Next bus scheduled for {trip.nextTrips[0].arrivalTime}</p> : <></>}
+                    </div>
+                  }
+                />
+                </div>
+                <div>
+                  <TravelTime tripInfo={trip} />
+                </div>
+
+                </div>
+                <Collapse orientation="vertical" in={selectedRoute && selectedRoute.tripId === trip.tripId}>
+                <div className="routeTL">
+                {/* <Timeline stops={trip.stopsInfo}/> */}
+                <div class="container">
+                  <div class="wrapper">
+                    <ul class="sessions">
+                    {trip.stopsInfo.map((stop, index) => (
                       <div className="list-contain">
-                        <li>
-                          <div className="timeline-stop">
-                            <div className="stop-name">{trip.stopsInfo[0].name}</div>
-                            <div className="stop-time">{trip.stopsInfo[0].time}</div>
-                          </div>
-                        </li>
+                      <li>
+                        <div key={index} className="timeline-stop">
+                          <div className="stop-name">{stop.name}</div>
+                          <div className="stop-time">{`Schedule: ${stop.time}`}</div>
+                        </div>
+                      </li>
                       </div>
-
-                      {(trip.stopsInfo.length > 2) && (
-                    <li>
-                      <div className="timeline-stop ellipses" onClick={() => handleStopClick(index)}>
-                        {stopExpanded[index] ? <ExpandLess /> : <ExpandMore />}
-                        {/* Add label for total number of intermediate stops and time between arrival times */}
-                        <span className="dropdown-label">
-                          { stopExpanded[index] ? null : `${trip.stopsInfo.length - 2} stops, ${getTravelTime(trip.stopsInfo[trip.stopsInfo.length - 2].time, trip.stopsInfo[1].time)} minutes`}
-                        </span>
-                      </div>
-                      {stopExpanded[index] &&
-                        trip.stopsInfo.slice(1, -1).map((stop, i) => (
-                          <div className="list-contain" key={i}>
-                            <li>
-                              <StyledTimelineStop className={`timeline-stop ${i === 0 ? 'first' : (i === trip.stopsInfo.length - 1 ? 'last' : 'intermediate')}`}>
-                                <div className="stop-name">{stop.name}</div>
-                                <div className="stop-time">{stop.time}</div>
-                              </StyledTimelineStop>
-                            </li>
-                          </div>
-                        ))
-                      }
-                    </li>
-                  )}
-
-                  {/* Always render the last stop */}
-                  <div className="list-contain">
-                    <li>
-                      <div className="timeline-stop">
-                        <div className="stop-name">{trip.stopsInfo[trip.stopsInfo.length - 1].name}</div>
-                        <div className="stop-time">{trip.stopsInfo[trip.stopsInfo.length - 1].time}</div>
-                      </div>
-                    </li>
+                      ))}
+                    </ul>
                   </div>
-                </ul>
-              </div> )}
-                  </div>
-                </ListItem>
+                </div>
+                </div>
+                </Collapse>
+                {/* </div> */}
+              </ListItem>
                 </>
               ))}
             </List>
+            </>
           ) : (
             <Typography variant="body1">
               No routes found. :( Try searching from a different stop!
             </Typography>
+
+
           )}
 
         </StyledRoutes>
