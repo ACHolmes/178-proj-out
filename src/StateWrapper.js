@@ -13,7 +13,7 @@ const StateWrapper = () => {
       <div className='navDis'>
         <Navigation selectedRoute={selectedRoute} setSelectedRoute={setSelectedRoute} fastestRoutes={fastestRoutes} setFastestRoutes={setFastestRoutes} />
       </div>
-      <div style={{display: "flex", flexDirection:"row", width: "100%", justifyContent: "center"}}>
+      <div style={{display: "flex", flexDirection:"row", justifyContent: "center"}}>
         <DeviceFrameset device="iPhone X" width={width} height={height} zoom={0.9}>
           <MapWrapper width={width} height={height} selectedRoute={selectedRoute} fastestRoutes={fastestRoutes} />
         </DeviceFrameset>
