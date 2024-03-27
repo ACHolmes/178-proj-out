@@ -1,7 +1,7 @@
 import gatherDefaultMapData from "./gatherDefaultMapData";
 import route_data from "./data/data_by_route.json";
 
-const minThreshold = 20;
+const minThreshold = 30;
 
 const gatherRouteMapData = (liveBusData, selectedRoute, fastestRoutes, setRoutes, setStops, setBuses) => {
 

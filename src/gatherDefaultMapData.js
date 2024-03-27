@@ -100,11 +100,11 @@ const gatherDefaultMapData = (liveBusData, fastestRoutes, setRoutes, setStops, s
   const cleaned_stops = {};
   for (const [stop_id, stop_info] of Object.entries(new_route_stops)) {
     // If every route for this stop is ACTIVE and HIDDEN
-    // Then this stop should not be displayed: the buses are running to it, but they're all marked as hidden
+    // Then this stop should NOT be displayed: the buses are running to it, but they're all marked as hidden
     // hence we are not showing those buses, and not because the bus is currently inactive.
     let include = false;
     for (const route of Object.values(stop_info.routes)) {
-      if (route.inactive || !route.hidden) {
+      if (!(route.inactive && route.hidden)) {
         include = true
       }
     }
