@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, List, ListItem, ListItemText, Container, Box } from '@mui/material';
+import { Button, Typography, List, ListItem, ListItemText, Container, Box, ListItemIcon, Collapse } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import MapInputForm from './MapInputForm';
 import { styled } from '@mui/system';
 import stopMappings from './data/stop_mappings.json';
@@ -318,64 +319,41 @@ const Navigation = () => {
               {fastestRoutes.map((trip, index) => (
                 <>
                 <LiveArrival tripInfo={trip} />
-                <ListItem className={selectedRoute === index ? 'selectedRoute' : ''}>
-                  <div className="routeOption">
-                  <ListItemText
-                    primary={`Route ${trip.routeName}`}
-                    secondary={`Leaving at: ${trip.arrivalTime}, Arriving at destination at: ${trip.destArrivalTime}`}
-                    onClick={() => handleRouteClick(index)}
-                    style={{ cursor: 'pointer', fontWeight: selectedRoute === index ? 'bold' : 'normal'  }}
-                  />
-              {selectedRoute === index && (
-                  <div className="routeTL">
-                    <ul className="sessions">
-                      {/* Always render the first stop */}
+                <ListItem key={index} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
+              onClick={() => handleRouteClick(index)} style={{ cursor: 'pointer' }}>
+                {/* <div className="routeOption"> */}
+                <div className="routeListing">
+                <ListItemIcon>
+                  <DirectionsBusIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary={trip.routeName}
+                  secondary={`Leaving at: ${trip.arrivalTime}, Arrive at Dest. at: ${trip.destArrivalTime}`}
+                />
+                </div>
+                <Collapse orientation="vertical" in={selectedRoute === index}>
+                <div className="routeTL">
+                {/* <Timeline stops={trip.stopsInfo}/> */}
+                <div class="container">
+                  <div class="wrapper">
+                    <ul class="sessions">
+                    {trip.stopsInfo.map((stop, index) => (
                       <div className="list-contain">
-                        <li>
-                          <div className="timeline-stop">
-                            <div className="stop-name">{trip.stopsInfo[0].name}</div>
-                            <div className="stop-time">{trip.stopsInfo[0].time}</div>
-                          </div>
-                        </li>
+                      <li>
+                        <div key={index} className="timeline-stop">
+                          <div className="stop-name">{stop.name}</div>
+                          <div className="stop-time">{`ETA: ${stop.time}`}</div>
+                        </div>
+                      </li>
                       </div>
-
-                      {(trip.stopsInfo.length > 2) && (
-                    <li>
-                      <div className="timeline-stop ellipses" onClick={() => handleStopClick(index)}>
-                        {stopExpanded[index] ? <ExpandLess /> : <ExpandMore />}
-                        {/* Add label for total number of intermediate stops and time between arrival times */}
-                        <span className="dropdown-label">
-                          { stopExpanded[index] ? null : `${trip.stopsInfo.length - 2} stops, ${getTravelTime(trip.stopsInfo[trip.stopsInfo.length - 2].time, trip.stopsInfo[1].time)} minutes`}
-                        </span>
-                      </div>
-                      {stopExpanded[index] &&
-                        trip.stopsInfo.slice(1, -1).map((stop, i) => (
-                          <div className="list-contain" key={i}>
-                            <li>
-                              <StyledTimelineStop className={`timeline-stop ${i === 0 ? 'first' : (i === trip.stopsInfo.length - 1 ? 'last' : 'intermediate')}`}>
-                                <div className="stop-name">{stop.name}</div>
-                                <div className="stop-time">{stop.time}</div>
-                              </StyledTimelineStop>
-                            </li>
-                          </div>
-                        ))
-                      }
-                    </li>
-                  )}
-
-                  {/* Always render the last stop */}
-                  <div className="list-contain">
-                    <li>
-                      <div className="timeline-stop">
-                        <div className="stop-name">{trip.stopsInfo[trip.stopsInfo.length - 1].name}</div>
-                        <div className="stop-time">{trip.stopsInfo[trip.stopsInfo.length - 1].time}</div>
-                      </div>
-                    </li>
+                      ))}
+                    </ul>
                   </div>
-                </ul>
-              </div> )}
-                  </div>
-                </ListItem>
+                </div> 
+                </div>
+                </Collapse>
+                {/* </div> */}
+              </ListItem>
                 </>
               ))}
             </List>
