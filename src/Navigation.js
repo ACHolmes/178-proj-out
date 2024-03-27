@@ -111,6 +111,17 @@ const Navigation = () => {
     return date;
   }
 
+  function getTravelTime(endTime, startTime) {
+    // const startTime = new Date(`2000-01-01 ${startTimeStr}`);
+    // const endTime = new Date(`2000-01-01 ${endTimeStr}`);
+
+    const timeDiffMs = endTime - startTime;
+
+    const timeDiffMinutes = Math.abs(timeDiffMs) / (1000 * 60);
+
+    return timeDiffMinutes;
+  }
+
   async function getNextBusArrival(route, startStop, destStop, depTime = null) {
     const foundTrips = [];
     let seenRoutes = new Set();
@@ -169,15 +180,17 @@ const Navigation = () => {
                 const destArrivalTime = new Date(
                   `${departureTime.toDateString()} ${next_stop.arrival_time}`
                 );
+                const travelTime = getTravelTime(destArrivalTime, arrivalTime);
                 const tripInfo = {
                   "route": route,
                   "routeName": routeMappings[route],
                   "tripId": tripId,
-                  "arrivalTime": arrivalTime.toLocaleTimeString(),
-                  "destArrivalTime": destArrivalTime.toLocaleTimeString(),
+                  "arrivalTime": arrivalTime.toLocaleTimeString("en-US", options),
+                  "destArrivalTime": destArrivalTime.toLocaleTimeString("en-US", options),
                   "startStopId": startStopId,
                   "stopsInfo": route_stops,
                   "nextTrips": [],
+                  "travelTime": travelTime,
                 };
                 if (seenRoutes.has(route)) {
                   for (let i = 0; i < foundTrips.length; i++) {
@@ -280,23 +293,25 @@ const Navigation = () => {
     }
 
     if (nextArrivalTime != null) {
-      return <p style={{color: "red"}}>Live ETA: {nextArrivalTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit'})}</p>
+      return <p className="live-eta">ETA: {nextArrivalTime.toLocaleTimeString("en-US", options)}</p>
     } else {
       return <></>
     }
   }
 
-  function getTravelTime(endTimeStr, startTimeStr) {
-    const startTime = new Date(`2000-01-01 ${startTimeStr}`);
-    const endTime = new Date(`2000-01-01 ${endTimeStr}`);
-
-    const timeDiffMs = endTime - startTime;
-
-    const timeDiffMinutes = Math.abs(timeDiffMs) / (1000 * 60);
-
-    return timeDiffMinutes;
+  const TravelTime = ({ tripInfo }) => {
+    const routeTravelTime = tripInfo.travelTime;
+    const routeTT = routeTravelTime.toString();
+    if (routeTravelTime != null) {
+      return (
+        <div className="travel-time-chunk">
+          <p className="tt-text">Travel</p>
+          <p className="tt-num">{routeTT}</p>
+          <p className="tt-mins">min(s)</p>
+        </div>
+        )
+    }
   }
-
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" marginTop={4} >
@@ -316,26 +331,35 @@ const Navigation = () => {
             <List>
               <Typography variant="h6">Suggested routes:</Typography>
               {fastestRoutes.map((trip, index) => (
-                <>
+                 <>
                 
-                <ListItem {/*key={index}*/} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
+                <ListItem alignItems="flex-start" disableGutters key={index} className={'routeOption'}
               onClick={() => handleRouteClick(index)} style={{ cursor: 'pointer' }}>
-                {/* <div className="routeOption"> */}
+                <div className="route-short">
+
                 <div className="routeListing">
                 <ListItemIcon>
-                  <DirectionsBusIcon />
+                  <DirectionsBusIcon className={'testIcon'}/>
                 </ListItemIcon>
-                <ListItemText 
-                  primary={trip.routeName}
+                <ListItemText
+                  primary={
+                    <div className="route-title">
+                      <p className="route-name">{trip.routeName}</p>
+                      <LiveArrival tripInfo={trip} />
+                    </div>
+                  }
                   secondary={
                     <div>
-                      <p>Leaving at: {trip.arrivalTime}</p>
-                      <LiveArrival tripInfo={trip} />
-                      <p>Arriving at destination at: {trip.destArrivalTime}</p>
-                      {trip.nextTrips.length > 0 ? <p>Next arrival is scheduled for trip.nextTrips[0].arrivalTime</p> : <></>}
+                      <p className="time-range">{trip.arrivalTime} - {trip.destArrivalTime}</p>
+                      {trip.nextTrips.length > 0 ? <p className="next-arrival">Next arrival scheduled for {trip.nextTrips[0].arrivalTime}</p> : <></>}
                     </div>
                   }
                 />
+                </div>
+                <div>
+                  <TravelTime tripInfo={trip} />
+                </div>
+                
                 </div>
                 <Collapse orientation="vertical" in={selectedRoute === index}>
                 <div className="routeTL">
@@ -368,6 +392,8 @@ const Navigation = () => {
             <Typography variant="body1">
               No routes found. :( Try searching from a different stop!
             </Typography>
+
+
           )}
 
         </StyledRoutes>

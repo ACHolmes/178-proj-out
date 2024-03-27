@@ -11,7 +11,7 @@ function App() {
       <div className='navDis'>
         <Navigation  />
       </div>
-      <div style={{margin: "20px", display: "flex", flexDirection:"row", width: "100%", justifyContent: "center"}}>
+      <div style={{margin: "20px", display: "flex", flexDirection:"row", justifyContent: "center"}}>
         <MapWrapper width={width} height={height} />
       </div>
     </div>
