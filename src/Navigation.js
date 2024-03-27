@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Typography, List, ListItem, ListItemText, Container, Box, ListItemIcon, Collapse } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
+import { Tooltip } from 'react-tooltip'
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import MapInputForm from './MapInputForm';
 import { styled } from '@mui/system';
@@ -291,9 +292,30 @@ const Navigation = () => {
         }
       }
     }
-    
+
+
     if (nextArrivalTime != null) {
-      return <p className={`live-eta-${nextArrivalTime < scheduled ? 'green' : 'red'}`}>ETA: {nextArrivalTime}</p>
+      // return (
+      // <div>
+      //   <p className={`live-eta-${nextArrivalTime < scheduled ? 'green' : 'red'}`}>
+      // Live ETA: {nextArrivalTime}</p>
+      // </div> )
+      return (
+        <div>
+
+          <a
+            data-tooltip-id="my-tooltip"
+            data-tooltip-content="This gives a more accurate ETA based on bus location."
+            data-tooltip-place="top"
+          >
+            <p 
+        className={`live-eta-${nextArrivalTime < scheduled ? 'green' : 'red'}`}>
+        Live ETA: {nextArrivalTime}
+      </p>
+          </a>
+      <Tooltip id="my-tooltip" />
+    </div>)
+
     } else {
       return <></>
     }
@@ -351,7 +373,7 @@ const Navigation = () => {
                   secondary={
                     <div>
                       <p className="time-range">{trip.arrivalTime} - {trip.destArrivalTime}</p>
-                      {trip.nextTrips.length > 0 ? <p className="next-arrival">Next arrival scheduled for {trip.nextTrips[0].arrivalTime}</p> : <></>}
+                      {trip.nextTrips.length > 0 ? <p className="next-arrival">Next bus scheduled for {trip.nextTrips[0].arrivalTime}</p> : <></>}
                     </div>
                   }
                 />
@@ -372,7 +394,7 @@ const Navigation = () => {
                       <li>
                         <div key={index} className="timeline-stop">
                           <div className="stop-name">{stop.name}</div>
-                          <div className="stop-time">{`ETA: ${stop.time}`}</div>
+                          <div className="stop-time">{`Schedule: ${stop.time}`}</div>
                         </div>
                       </li>
                       </div>
