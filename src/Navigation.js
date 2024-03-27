@@ -55,14 +55,12 @@ const Navigation = (props) => {
   };
 
   const handleRouteClick = (trip, index) => {
-    console.log("SETTING SELECTED ROUTE");
-    // const selected = {...trip, index:index};
-    console.log(trip);
-    if (selectedRoute && selectedRoute.trip_id === trip.trip_id) {
+    // If re-click, no need to update state
+    if (selectedRoute && selectedRoute.tripId === trip.tripId) {
       return;
     }
+    // Else update state with new selected route to show
     setSelectedRoute(trip);
-    // setSelectedRoute((currentSelected) => (currentSelected && currentSelected.trip_id === trip.trip_id ? null : trip));
   };
 
 

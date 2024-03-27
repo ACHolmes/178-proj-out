@@ -41,12 +41,12 @@ const busicon = (color) => {
 const busstop = {
   url: stop_icon,
   scaledSize: {
-    height: 30,
-    width: 30
+    height: 20,
+    width: 20
   },
   anchor: {
-    x: 15,
-    y: 10
+    x: 10,
+    y: 5
   }
 }
 
@@ -93,21 +93,13 @@ const mapOptions = {
 };
 
 const Map = (props) => {
-  // console.log("PROPS");
-  // console.log(props.stops);
-
   const [selectedStop, setSelectedStop] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
-
-
-  console.log(props.selectedRoute);
 
   const mapContainerStyle = {
     width: `${props.width}px`,
     height: `${props.height}px`,
   };
-
-  // console.log(props.buses);
 
   const buses = props.buses.map((bus) => {
     return {

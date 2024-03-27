@@ -6,10 +6,7 @@ import { useEffect, useState } from 'react';
 const StateWrapper = () => {
   const [width, height] = [375, 812];
   const [selectedRoute, setSelectedRoute] = useState(null);
-  useEffect(() => {
-    console.log("SelectedRoute in wrapped");
-    console.log(selectedRoute);
-  }, [selectedRoute]);
+
   return (
     <>
       <div className='navDis'>

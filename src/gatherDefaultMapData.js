@@ -1,6 +1,6 @@
 import route_data from './data/data5.json';
 
-const gatherDefaultMapData = (liveBusData, setData, setRoutes, setStops) => {
+const gatherDefaultMapData = (liveBusData, setRoutes, setStops, setBuses) => {
 
   // First setting up all the routes
   const new_routes = [...new Set(liveBusData.map((liveBus) => {
@@ -52,8 +52,6 @@ const gatherDefaultMapData = (liveBusData, setData, setRoutes, setStops) => {
   // Getting all stops that these routes hit
   const new_route_stops = {};
 
-  // console.log(route_data);
-
   liveBusData.forEach((liveBus) => {
     for (const route_info of route_data) {
       for (const trip_info of Object.values(route_info.trips)) {
@@ -89,8 +87,8 @@ const gatherDefaultMapData = (liveBusData, setData, setRoutes, setStops) => {
 
   // Then setting the live bus data
   setRoutes(new_routes);
-  setData(result);
   setStops(new_route_stops);
+  setBuses(liveBusData);
 };
 
 export default gatherDefaultMapData;
