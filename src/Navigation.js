@@ -318,7 +318,7 @@ const Navigation = () => {
               {fastestRoutes.map((trip, index) => (
                 <>
                 
-                <ListItem {/*key={index}*/} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
+                <ListItem key={index} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
               onClick={() => handleRouteClick(index)} style={{ cursor: 'pointer' }}>
                 {/* <div className="routeOption"> */}
                 <div className="routeListing">
