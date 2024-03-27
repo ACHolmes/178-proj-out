@@ -108,12 +108,14 @@ const Navigation = () => {
     const minutes = date.getUTCMinutes();
     const seconds = date.getUTCSeconds();
 
-    console.log('date in ms function is', date);
     return date;
   }
 
   async function getNextBusArrival(route, startStop, destStop, depTime = null) {
     const foundTrips = [];
+    let seenRoutes = new Set();
+    console.log('fetching bus');
+    // let alreadyFound = false;
 
     const routeData = dataByRoute[route.toString()];
     if (!routeData) {
@@ -174,9 +176,21 @@ const Navigation = () => {
                   "arrivalTime": arrivalTime.toLocaleTimeString(),
                   "destArrivalTime": destArrivalTime.toLocaleTimeString(),
                   "startStopId": startStopId,
-                  "stopsInfo": route_stops
+                  "stopsInfo": route_stops,
+                  "nextTrips": [],
                 };
-                foundTrips.push(tripInfo);
+                console.log('tripinfo');
+                if (seenRoutes.has(route)) {
+                  for (const trip in foundTrips) {
+                    if (trip["route"] == route) {
+                      trip["nextTrips"] = tripInfo;
+                    }
+                  }
+                } else {
+                  foundTrips.push(tripInfo);
+                  seenRoutes.add(route);
+                }
+                
                 break;
               }
             }
@@ -193,7 +207,6 @@ const Navigation = () => {
 
     return foundTrips;
   }
-
   async function fetchBusArrival(routes, startStop, destStop, departureTime = null) {
     const allTrips = [];
     for (const route of routes) {
@@ -207,7 +220,10 @@ const Navigation = () => {
       const arrivalTimeB = new Date(`2000-01-01 ${b.arrivalTime}`);
       return arrivalTimeA - arrivalTimeB;
     });
-    setFastestRoutes(allTrips.slice(0, 1));
+
+    // console.log('all trips are', allTrips);
+    console.log('allTrips', allTrips);
+    setFastestRoutes(allTrips);
   }
 
   const calculateRoutes = () => {
@@ -233,58 +249,42 @@ const Navigation = () => {
 
     // TODO: add some await Promise logic here when grabbing live data
     const liveBuses = liveData["entity"];
-    let nextArrivalTime;
+    let nextArrivalTime = null;
     let liveTrips = [];
     for (const busTrip of liveBuses) {
       liveTrips.push(busTrip["trip_update"]["trip"]["trip_id"]);
     }
     console.log(liveTrips);
 
-    if (liveTrips.includes(tripInfo.tripId)) {
-      console.log('YES, trip id', tripInfo.tripId, 'is currently running');
-    }
-
-    const timetableRouteId = tripInfo.routeId;
-
     // iterate through all live trips
     for (const busTrip of liveBuses) {
       const busTripId = busTrip["trip_update"]["trip"]["trip_id"];
-      const liveBusRouteId = tripToRouteMapping[busTripId]; // get route ID
-      console.log('live bus is on route', liveBusRouteId);
-      if (liveBusRouteId == timetableRouteId) {
-        console.log('these trips are part of the same route', liveBusRouteId);
-      }
-
+      console.log('trip to route mapping is', tripToRouteMapping[busTripId]);
+      console.log(tripInfo.route);
+      if (tripToRouteMapping[busTripId] == tripInfo.route) {
       // if it matches the timetable search result, find ETAs and append to tripInfo
-      if (busTripId == tripInfo.tripId) {
+      // if (busTripId == tripInfo.tripId) {
         console.log('we have a matching trip!')
         const stopUpdates = busTrip["trip_update"]["stop_time_update"];
         tripInfo["liveData"] = stopUpdates;
         console.log(stopUpdates);
 
+        // augment the stop_times in the tripInfo dict
         for (const stopEntry of stopUpdates) {
           if (stopEntry["stop_id"] == tripInfo.startStopId) {
-            nextArrivalTime = stopEntry["arrival"]["time"];
-            console.log('ms time is', nextArrivalTime);
-            console.log('time is', msToTime(nextArrivalTime));
+            nextArrivalTime = msToTime(stopEntry["arrival"]["time"]);
+            console.log('next arrival to ', stopEntry["stop_id"], 'time is', nextArrivalTime);
+            console.log('tripID', busTripId);
           }
         }
       }
     }
 
-    //  tripInfo
-    // "route": route,
-    // "routeName": routeMappings[route],
-    // "tripId": tripId,
-    // "arrivalTime": arrivalTime.toLocaleTimeString(),
-    // "destArrivalTime": destArrivalTime.toLocaleTimeString(),
-    // "startStopId": startStopId,
-    // "stopsInfo": route_stops
-
-    return (
-      // <p>{nextArrivalTime}</p>
-      <p>Next bus on route {tripInfo.routeName} is </p>
-    );
+    if (nextArrivalTime != null) {
+      return <p style={{color: "red"}}>Live ETA: {nextArrivalTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit'})}</p>
+    } else {
+      return <></>
+    }
   }
 
   function getTravelTime(endTimeStr, startTimeStr) {
@@ -318,8 +318,8 @@ const Navigation = () => {
               <Typography variant="h6">Suggested routes:</Typography>
               {fastestRoutes.map((trip, index) => (
                 <>
-                <LiveArrival tripInfo={trip} />
-                <ListItem key={index} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
+                
+                <ListItem {/*key={index}*/} className={selectedRoute === index ? 'selectedRoute' : 'routeOption'}
               onClick={() => handleRouteClick(index)} style={{ cursor: 'pointer' }}>
                 {/* <div className="routeOption"> */}
                 <div className="routeListing">
@@ -328,7 +328,14 @@ const Navigation = () => {
                 </ListItemIcon>
                 <ListItemText 
                   primary={trip.routeName}
-                  secondary={`Leaving at: ${trip.arrivalTime}, Arrive at Dest. at: ${trip.destArrivalTime}`}
+                  secondary={
+                    <div>
+                      <p>Leaving at: {trip.arrivalTime}</p>
+                      <LiveArrival tripInfo={trip} />
+                      <p>Arriving at destination at: {trip.destArrivalTime}</p>
+                      {trip.nextTrips.length > 0 ? <p>Next arrival is scheduled for trip.nextTrips[0].arrivalTime</p> : <></>}
+                    </div>
+                  }
                 />
                 </div>
                 <Collapse orientation="vertical" in={selectedRoute === index}>

@@ -16,7 +16,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 }));
 
 function MapInputForm({ onSubmit }) {
-    const [start, setStart] = useState('Quad');
+    const [start, setStart] = useState('Leverett House');
     const [destination, setDestination] = useState('SEC');
     const [departureTime, setDepartureTime] = useState('');
     const [isDepartureScheduled, setIsDepartureScheduled] = useState(false);
