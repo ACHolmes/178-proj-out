@@ -178,11 +178,10 @@ const Navigation = () => {
                   "stopsInfo": route_stops,
                   "nextTrips": [],
                 };
-                console.log('tripinfo');
                 if (seenRoutes.has(route)) {
-                  for (const trip in foundTrips) {
-                    if (trip["route"] == route) {
-                      trip["nextTrips"] = tripInfo;
+                  for (let i = 0; i < foundTrips.length; i++) {
+                    if (foundTrips[i]["route"] == route) {
+                      foundTrips[i]["nextTrips"].push(tripInfo);
                     }
                   }
                 } else {
@@ -221,7 +220,7 @@ const Navigation = () => {
     });
 
     // console.log('all trips are', allTrips);
-    console.log('allTrips', allTrips);
+    console.log('ALLTRIPS', allTrips);
     setFastestRoutes(allTrips);
   }
 
@@ -258,8 +257,8 @@ const Navigation = () => {
     // iterate through all live trips
     for (const busTrip of liveBuses) {
       const busTripId = busTrip["trip_update"]["trip"]["trip_id"];
-      console.log('trip to route mapping is', tripToRouteMapping[busTripId]);
-      console.log(tripInfo.route);
+      // console.log('trip to route mapping is', tripToRouteMapping[busTripId]);
+      // console.log(tripInfo.route);
       if (tripToRouteMapping[busTripId] == tripInfo.route) {
       // if it matches the timetable search result, find ETAs and append to tripInfo
       // if (busTripId == tripInfo.tripId) {
