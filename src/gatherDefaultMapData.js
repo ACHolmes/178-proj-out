@@ -1,6 +1,6 @@
 import route_data from './data/data5.json';
 
-const gatherDefaultMapData = (liveBusData, fastestRoutes,  setRoutes, setStops, setBuses) => {
+const gatherDefaultMapData = (liveBusData, fastestRoutes, setRoutes, setStops, setBuses) => {
 
   // First setting up all the routes
   const new_routes = [...new Set(liveBusData.map((liveBus) => {
@@ -97,11 +97,25 @@ const gatherDefaultMapData = (liveBusData, fastestRoutes,  setRoutes, setStops, 
     }
   });
 
-  console.log(new_route_stops);
+  const cleaned_stops = {};
+  for (const [stop_id, stop_info] of Object.entries(new_route_stops)) {
+    // If every route for this stop is ACTIVE and HIDDEN
+    // Then this stop should not be displayed: the buses are running to it, but they're all marked as hidden
+    // hence we are not showing those buses, and not because the bus is currently inactive.
+    let include = false;
+    for (const route of Object.values(stop_info.routes)) {
+      if (route.inactive || !route.hidden) {
+        include = true
+      }
+    }
+    if (include) {
+      cleaned_stops[stop_id] = stop_info
+    }
+  }
 
   // Then setting the live bus data
   setRoutes(new_routes);
-  setStops(new_route_stops);
+  setStops(cleaned_stops);
   setBuses(liveBusData);
 };
 

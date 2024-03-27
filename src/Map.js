@@ -131,7 +131,15 @@ const Map = (props) => {
   });
   // console.log(buses);
 
-  const routes = props.routes.map((route) => {
+  const routes = props.routes.filter((route) => {
+    // Should display if:
+    // route is active and not hidden
+    // route is inactive and hidden
+    // Should not display if:
+    // route is active and hidden
+    return (!route.inactive && !route.hidden) || (route.inactive && route.hidden);
+  })
+  .map((route) => {
     return {
       "points": route.points.map((point) => {
         return {
@@ -251,8 +259,9 @@ const Map = (props) => {
               <u style={{marginBottom: 40 + 'px'}}>Active Routes:</u>
               <div style={{display: "flex", flexDirection: "column", width: 100 + '%'}}>
                 {
+                  // I'm using this to only show ACTIVE routes to any stop displayed on the map
                   Object.values(selectedStop.routes).filter((route)=> {
-                    return !(route.hidden);
+                    return !(route.inactive);
                   }).map((route) => {
                     return <div style={{ backgroundColor: '#' + route.route_color, color: "#FFF", fontWeight: "900", fontSize: 16 + 'px', textAlign: "center", padding: "4px 4px 4px 4px"}}>
                       {route.route_long_name}

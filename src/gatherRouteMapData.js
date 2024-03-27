@@ -5,20 +5,16 @@ const minThreshold = 20;
 
 const gatherRouteMapData = (liveBusData, selectedRoute, fastestRoutes, setRoutes, setStops, setBuses) => {
 
+  // OPTION 1: If there's a live bus that matches the selected bus trip id, PERFECT. SHOW THAT ONE AND NOTHING ELSE
   liveBusData.forEach((bus) => {
-    // If the bus we want to take is currently active (should generally be true when not using
-    // schedule feature), can just ignore all the other data but otherwise treat as the normal case
     if (bus.vehicle.trip.trip_id === selectedRoute.tripId) {
       return gatherDefaultMapData([bus], fastestRoutes, setRoutes, setStops, setBuses);
     }
   })
-  // If we reach here, the current trip is not yet active.
-  // Could be: using schedule, so route might not even be active
-  // Or for example, starting from the quad: bus on approach to quad is still finishing the previous trip
 
-  // Using a 'heuristic' I suppose: let's compare arrivalTime to current time - if within 20 mins, we should probably show
-  // currently running buses. Otherwise, it's probably a schedule for the future, so current buses are a bit meaningless.
-
+  // OPTION 2: No live bus with current trip ID, BUT the selected bus arrival time is soon (<minThreshold mins).
+  // DISPLAY ALL BUSES ON THE ROUTE OF THE BUS WE ARE LOOKING FOR IF ANY ARE CURRENTLY ACTIVE.
+  // Idea here being: one of those buses is likely about to finish its trip, and will be the bus the user wants.
   const now = new Date();
 
   // Getting time into military time
@@ -35,19 +31,20 @@ const gatherRouteMapData = (liveBusData, selectedRoute, fastestRoutes, setRoutes
 
   // Check within twenty mins of current time
   if ((arrivalDate - new Date()) < minThreshold * 60 * 1000) {
-    // If here, we should check live buses in case any of them are on the correct route, if so, let's display those in case
-    // one of them is actually the trip we want.
+    // If here, we should check live buses in case any of them are on the correct route
     const cur_buses = liveBusData.filter((bus) => {
       return (bus.vehicle.trip.trip_id in route_data[selectedRoute.route].trips);
     })
+    // If we found buses on the correct route, display those!
     if (cur_buses.length > 0) {
       return gatherDefaultMapData(cur_buses, fastestRoutes, setRoutes, setStops, setBuses);
     }
     // NOTE: Kinda want like a 'next_trip_id' for each bus, maybe this is doable, maybe not
-
   }
 
-  // In this case, just display the route, no point showing buses
+  // OPTION 3: Bus is not arriving within minThreshold minutes, so we are likely using schedule feature, or
+  // just no relevant bus info to display currently. Let's just display the route and its stops.
+  // To do so, we create a fake bus that we won't show to fit in with the default map data system.
   const fake_bus = {
     vehicle: {
       vehicle: {
@@ -79,10 +76,20 @@ const gatherRouteMapData = (liveBusData, selectedRoute, fastestRoutes, setRoutes
     inactive: true
   }
 
-  console.log(selectedRoute);
-  console.log("Creating fake bus!");
-  // for now, just show everything, will update this shortly
-  return gatherDefaultMapData([fake_bus], fastestRoutes, setRoutes, setStops, setBuses);
+  // These are ACTIVE, but should be HIDDEN. We are interested in the INACTIVE bus.
+  // We still keep these though, as they may be running to stops that we should display
+  // and I want to show those as currently active routes at those stops.
+  const current_buses = liveBusData.map((bus) => {
+    return {
+      ...bus,
+      inactive: false,
+      hidden: true
+    }
+  })
+
+  // Use the default map system with our fake bus (INACTIVE and HIDDEN, will show route and stops)
+  // And the other buses                          (ACTIVE   and HIDDEN, will just show in stop info of stops the bus of interest stops at)
+  return gatherDefaultMapData([fake_bus, ...current_buses], fastestRoutes, setRoutes, setStops, setBuses);
 
 };
 
