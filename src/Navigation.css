@@ -99,7 +99,7 @@
     
 }
 
-.live-eta {
+.live-eta-red {
     color: white;
     background-color: red;
     font-size: 0.8rem;
@@ -113,6 +113,22 @@
     margin-top: 0px;
     margin-bottom: 0px;
 }
+
+.live-eta-green {
+    color: white;
+    background-color: green;
+    font-size: 0.8rem;
+    margin-left: 0.8rem;
+    text-align: center;
+    border-radius: 7px;
+    padding-left: 4px;
+    padding-right: 4px;
+    /* border: solid; */
+    height: fit-content;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
 
 .route-info {
 

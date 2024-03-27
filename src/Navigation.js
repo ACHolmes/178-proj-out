@@ -256,7 +256,7 @@ const Navigation = () => {
     }
   };
 
-  const LiveArrival = ({ tripInfo }) => {
+  const LiveArrival = ({ tripInfo, scheduled }) => {
     console.log('checking route', tripInfo.routeName, 'with trip id', tripInfo.tripId);
 
     // TODO: add some await Promise logic here when grabbing live data
@@ -284,16 +284,16 @@ const Navigation = () => {
         // augment the stop_times in the tripInfo dict
         for (const stopEntry of stopUpdates) {
           if (stopEntry["stop_id"] == tripInfo.startStopId) {
-            nextArrivalTime = msToTime(stopEntry["arrival"]["time"]);
+            nextArrivalTime = msToTime(stopEntry["arrival"]["time"]).toLocaleTimeString("en-US", options)
             console.log('next arrival to ', stopEntry["stop_id"], 'time is', nextArrivalTime);
             console.log('tripID', busTripId);
           }
         }
       }
     }
-
+    
     if (nextArrivalTime != null) {
-      return <p className="live-eta">ETA: {nextArrivalTime.toLocaleTimeString("en-US", options)}</p>
+      return <p className={`live-eta-${nextArrivalTime < scheduled ? 'green' : 'red'}`}>ETA: {nextArrivalTime}</p>
     } else {
       return <></>
     }
@@ -345,7 +345,7 @@ const Navigation = () => {
                   primary={
                     <div className="route-title">
                       <p className="route-name">{trip.routeName}</p>
-                      <LiveArrival tripInfo={trip} />
+                      {!(userInput.departureTime) ? <LiveArrival tripInfo={trip} scheduled={trip.arrivalTime} /> : <></> }
                     </div>
                   }
                   secondary={
