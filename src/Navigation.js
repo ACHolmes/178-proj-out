@@ -41,14 +41,13 @@ const StyledTimelineStop = styled('div')({
   },
 });
 
-const Navigation = () => {
-  const [fastestRoutes, setFastestRoutes] = useState([]);
+const Navigation = (props) => {
+  const [fastestRoutes, setFastestRoutes] = [props.fastestRoutes, props.setFastestRoutes];
   const [liveData, setLiveData] = useState(null);
   const [userInput, setUserInput] = useState({});
   const [searchClicked, setSearchClicked] = useState(false);
-  const [selectedRoute, setSelectedRoute] = useState(null);
   const [stopExpanded, setStopExpanded] = useState([]);
-
+  const [selectedRoute, setSelectedRoute] = [props.selectedRoute, props.setSelectedRoute];
   const options = {hour: "numeric", minute: "numeric"};
 
   const handleStopClick = (index) => {
@@ -59,8 +58,15 @@ const Navigation = () => {
     });
   };
 
-  const handleRouteClick = (index) => {
-    setSelectedRoute((prevIndex) => (prevIndex === index ? null : index));
+  const handleRouteClick = (trip, index) => {
+    // If re-click, no need to update state
+    if (selectedRoute && selectedRoute.tripId === trip.tripId) {
+      return;
+    }
+    // Else update state with new selected route to show
+    console.log("Selected trip update");
+    console.log(trip);
+    setSelectedRoute(trip);
   };
 
 
@@ -84,6 +90,14 @@ const Navigation = () => {
   const handleSearch = (data) => {
     setUserInput(data);
     setSearchClicked(true); // Set searchClicked to true when search button is clicked
+  };
+
+  const handleReset = () => {
+    // setUserInput(null);
+    // setSearchClicked(false);
+    setFastestRoutes(null);
+    setSelectedRoute(null);
+    console.log('reset fastest routes');
   };
 
   // Anytime setUserInput completes, calculate new routes
@@ -142,7 +156,7 @@ const Navigation = () => {
     for (const tripId in routeData.trips) {
       const trip = routeData.trips[tripId];
       const stops = trip.stops;
-      
+
       // check whether bus is running on this day
       const currentDay = currentTime.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
       if (!(trip.days.includes(currentDay))) {
@@ -203,7 +217,7 @@ const Navigation = () => {
                   foundTrips.push(tripInfo);
                   seenRoutes.add(route);
                 }
-                
+
                 break;
               }
             }
@@ -308,7 +322,7 @@ const Navigation = () => {
             data-tooltip-content="This gives a more accurate ETA based on bus location."
             data-tooltip-place="top"
           >
-            <p 
+            <p
         className={`live-eta-${nextArrivalTime < scheduled ? 'green' : 'red'}`}>
         Live ETA: {nextArrivalTime}
       </p>
@@ -345,8 +359,8 @@ const Navigation = () => {
       </StyledTypography>
 
       <Container maxWidth="sm">
-        <MapInputForm onSubmit={handleSearch} />
-        {searchClicked && userInput.start && userInput.destination && (
+        <MapInputForm onSubmit={handleSearch} onReset={handleReset} />
+        {fastestRoutes && userInput.start && userInput.destination && (
         <StyledRoutes>
           {fastestRoutes.length > 0 ? (
             <>
@@ -354,9 +368,9 @@ const Navigation = () => {
               <Typography variant="h6">Suggested routes:</Typography>
               {fastestRoutes.map((trip, index) => (
                  <>
-                
+
                 <ListItem alignItems="flex-start" disableGutters key={index} className={'routeOption'}
-              onClick={() => handleRouteClick(index)} style={{ cursor: 'pointer' }}>
+              onClick={() => handleRouteClick(trip,index)} style={{ cursor: 'pointer' }}>
                 <div className="route-short">
 
                 <div className="routeListing">
@@ -381,9 +395,9 @@ const Navigation = () => {
                 <div>
                   <TravelTime tripInfo={trip} />
                 </div>
-                
+
                 </div>
-                <Collapse orientation="vertical" in={selectedRoute === index}>
+                <Collapse orientation="vertical" in={selectedRoute && selectedRoute.tripId === trip.tripId}>
                 <div className="routeTL">
                 {/* <Timeline stops={trip.stopsInfo}/> */}
                 <div class="container">
@@ -401,7 +415,7 @@ const Navigation = () => {
                       ))}
                     </ul>
                   </div>
-                </div> 
+                </div>
                 </div>
                 </Collapse>
                 {/* </div> */}

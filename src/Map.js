@@ -1,6 +1,5 @@
 import { GoogleMap, useLoadScript, Marker, Polyline, InfoWindow, Popup} from '@react-google-maps/api';
 import usermarker from "./static/usermarker.svg"
-import bus_stop_raw from "./static/bus_stop.svg"
 import stop_icon from "./static/bus_terminal.svg"
 import stops_dict from "./data/stops_dict.json"
 import { useState } from 'react';
@@ -42,12 +41,12 @@ const busicon = (color) => {
 const busstop = {
   url: stop_icon,
   scaledSize: {
-    height: 30,
-    width: 30
+    height: 20,
+    width: 20
   },
   anchor: {
-    x: 15,
-    y: 10
+    x: 10,
+    y: 5
   }
 }
 
@@ -94,9 +93,6 @@ const mapOptions = {
 };
 
 const Map = (props) => {
-  // console.log("PROPS");
-  // console.log(props.stops);
-
   const [selectedStop, setSelectedStop] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
 
@@ -105,9 +101,9 @@ const Map = (props) => {
     height: `${props.height}px`,
   };
 
-  // console.log(props.buses);
-
-  const buses = props.buses.map((bus) => {
+  const buses = props.buses.filter((bus) => {
+    return !(bus.hidden);
+  }).map((bus) => {
     return {
       "vehicle_id": bus.vehicle.vehicle.id,
       "occupancy": bus.vehicle.occupancy_status,
@@ -135,7 +131,15 @@ const Map = (props) => {
   });
   // console.log(buses);
 
-  const routes = props.routes.map((route) => {
+  const routes = props.routes.filter((route) => {
+    // Should display if:
+    // route is active and not hidden
+    // route is inactive and hidden
+    // Should not display if:
+    // route is active and hidden
+    return (!route.inactive && !route.hidden) || (route.inactive && route.hidden);
+  })
+  .map((route) => {
     return {
       "points": route.points.map((point) => {
         return {
@@ -255,7 +259,10 @@ const Map = (props) => {
               <u style={{marginBottom: 40 + 'px'}}>Active Routes:</u>
               <div style={{display: "flex", flexDirection: "column", width: 100 + '%'}}>
                 {
-                  Object.values(selectedStop.routes).map((route) => {
+                  // I'm using this to only show ACTIVE routes to any stop displayed on the map
+                  Object.values(selectedStop.routes).filter((route)=> {
+                    return !(route.inactive);
+                  }).map((route) => {
                     return <div style={{ backgroundColor: '#' + route.route_color, color: "#FFF", fontWeight: "900", fontSize: 16 + 'px', textAlign: "center", padding: "4px 4px 4px 4px"}}>
                       {route.route_long_name}
                       </div>
