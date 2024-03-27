@@ -38,7 +38,7 @@ const StyledTimelineStop = styled('div')({
 });
 
 const Navigation = (props) => {
-  const [fastestRoutes, setFastestRoutes] = useState([]);
+  const [fastestRoutes, setFastestRoutes] = [props.fastestRoutes, props.setFastestRoutes];
   const [liveData, setLiveData] = useState(null);
   const [userInput, setUserInput] = useState({});
   const [searchClicked, setSearchClicked] = useState(false);

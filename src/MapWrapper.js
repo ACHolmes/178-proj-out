@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Map from './Map';
 import gatherDefaultMapData from './gatherDefaultMapData';
 import gatherRouteMapData from './gatherRouteMapData';
+import gatherResultsMapData from './gatherResultsMapData';
 
 
 const MapWrapper = (props) => {
@@ -29,17 +30,23 @@ const MapWrapper = (props) => {
   // Updates the map data if the buses, or the selectedRoute gets updated
   useEffect(() => {
     if (liveBusData) {
-      updateMapData(liveBusData, props.selectedRoute);
+      updateMapData(liveBusData, props.selectedRoute, props.fastestRoutes);
     }
-  }, [liveBusData, props.selectedRoute] )
+  }, [liveBusData, props.selectedRoute, props.fastestRoutes] )
 
   // Updates all the map data
-  const updateMapData = (liveBuses, selectedRoute) => {
+  const updateMapData = (liveBuses, selectedRoute, fastestRoutes) => {
     if (liveBuses) {
-      if (props.selectedRoute) {
-        gatherRouteMapData(liveBuses, selectedRoute, setRoutes, setStops, setBuses);
+      if (selectedRoute) {
+        // If we have a selected route, update data to display only that route
+        gatherRouteMapData(liveBuses, selectedRoute, fastestRoutes, setRoutes, setStops, setBuses);
+      } else if (fastestRoutes.length > 0) {
+        // Otherwise, if we have searched but not yet made a selection, show all the options
+        gatherResultsMapData(liveBuses, fastestRoutes, setRoutes, setStops, setBuses);
       } else {
-        gatherDefaultMapData(liveBuses, setRoutes, setStops, setBuses);
+        // Otherwise, show default options
+        console.log(liveBuses);
+        gatherDefaultMapData(liveBuses, fastestRoutes, setRoutes, setStops, setBuses);
       }
     }
   }

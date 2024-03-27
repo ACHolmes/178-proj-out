@@ -1,6 +1,6 @@
 import route_data from './data/data5.json';
 
-const gatherDefaultMapData = (liveBusData, setRoutes, setStops, setBuses) => {
+const gatherDefaultMapData = (liveBusData, fastestRoutes,  setRoutes, setStops, setBuses) => {
 
   // First setting up all the routes
   const new_routes = [...new Set(liveBusData.map((liveBus) => {
@@ -26,7 +26,9 @@ const gatherDefaultMapData = (liveBusData, setRoutes, setStops, setBuses) => {
           route_short_name: route_data[i].route_short_name,
           route_long_name:  route_data[i].route_long_name,
           route_color:      route_data[i].route_color,
-          route_text_color: route_data[i].route_text_color
+          route_text_color: route_data[i].route_text_color,
+          hidden:           liveBus.hidden,
+          inactive:         liveBus.inactive
         };
       }
     }
@@ -48,6 +50,8 @@ const gatherDefaultMapData = (liveBusData, setRoutes, setStops, setBuses) => {
     };
   }))];
 
+  console.log(new_routes);
+
 
   // Getting all stops that these routes hit
   const new_route_stops = {};
@@ -61,7 +65,11 @@ const gatherDefaultMapData = (liveBusData, setRoutes, setStops, setBuses) => {
           trip_info.stops.forEach((stop) => {
             // If we already have the stop, just need to update the routes for this stop
             if (stop.stop_id in new_route_stops) {
-              new_route_stops[stop.stop_id].routes[route_info.route_id] = route_info;
+              new_route_stops[stop.stop_id].routes[route_info.route_id] = {
+                ...route_info,
+                hidden: liveBus.hidden,
+                inactive: liveBus.inactive
+              };
             } else {
               // Else we need to create a new stop and add in all the info
               new_route_stops[stop.stop_id] = {
@@ -74,7 +82,11 @@ const gatherDefaultMapData = (liveBusData, setRoutes, setStops, setBuses) => {
                 },
                 // Starting with the routes just including this first route we found
                 routes: {
-                  [route_info.route_id]: route_info
+                  [route_info.route_id]: {
+                    ...route_info,
+                    hidden: liveBus.hidden,
+                    inactive: liveBus.inactive
+                  }
                 }
               }
             }
@@ -84,6 +96,8 @@ const gatherDefaultMapData = (liveBusData, setRoutes, setStops, setBuses) => {
       }
     }
   });
+
+  console.log(new_route_stops);
 
   // Then setting the live bus data
   setRoutes(new_routes);

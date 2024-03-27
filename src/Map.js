@@ -101,7 +101,9 @@ const Map = (props) => {
     height: `${props.height}px`,
   };
 
-  const buses = props.buses.map((bus) => {
+  const buses = props.buses.filter((bus) => {
+    return !(bus.hidden);
+  }).map((bus) => {
     return {
       "vehicle_id": bus.vehicle.vehicle.id,
       "occupancy": bus.vehicle.occupancy_status,
@@ -249,7 +251,9 @@ const Map = (props) => {
               <u style={{marginBottom: 40 + 'px'}}>Active Routes:</u>
               <div style={{display: "flex", flexDirection: "column", width: 100 + '%'}}>
                 {
-                  Object.values(selectedStop.routes).map((route) => {
+                  Object.values(selectedStop.routes).filter((route)=> {
+                    return !(route.hidden);
+                  }).map((route) => {
                     return <div style={{ backgroundColor: '#' + route.route_color, color: "#FFF", fontWeight: "900", fontSize: 16 + 'px', textAlign: "center", padding: "4px 4px 4px 4px"}}>
                       {route.route_long_name}
                       </div>
