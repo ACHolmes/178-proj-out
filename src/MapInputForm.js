@@ -51,7 +51,12 @@ function MapInputForm({ onSubmit }) {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        onSubmit({ start, destination, departureTime });
+        if (isDepartureScheduled) {
+            onSubmit({ start, destination, departureTime });
+        } else {
+            setDepartureTime('');
+            onSubmit({ start, destination, departureTime });
+        }
     };
 
     const stopOptions = [
