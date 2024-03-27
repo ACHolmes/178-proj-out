@@ -90,6 +90,7 @@ const Navigation = (props) => {
     // setUserInput(null);
     // setSearchClicked(false);
     setFastestRoutes(null);
+    setSelectedRoute(null);
     console.log('reset fastest routes');
   };
 
